@@ -1,4 +1,4 @@
-cc=g++ -g -Wall
+cc=g++ -g 
 LIB= -lpthread -lrt 
 ELF=main
 src=$(shell find ./ -name '*.cpp')
