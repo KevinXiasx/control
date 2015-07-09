@@ -2,18 +2,19 @@
 
 bool Address::init(string ip, int port)
 {
+	this->ip = ip;
+	this->port = port;
 	myaddr.sin_family = AF_INET;
 	myaddr.sin_port = htons(port);
-	int res = inet_aton(ip.c_str(),&(myaddr.sin_addr));
-	if(res == 0)
-		return false;
-	else
-		return true;
+	int res = inet_pton(AF_INET,ip.c_str(),&(myaddr.sin_addr));
+	ERR(res,0,"address_err",false);
+	ERR(res,-1,"address_err",false);
+	return true;
 }
 
 bool Socket::create_socket(int port)
 {
-	mysocketFd = socket(PF_INET,SOCK_STREAM,0);
+	mysocketFd = socket(PF_INET,SOCK_STREAM,IPPROTO_TCP);
 	ERR(mysocketFd,-1,"socket create fail !",false);
 
 	struct sockaddr_in address_my;
@@ -53,6 +54,16 @@ bool Socket::connect_socket(Address * addr)
 	return true;
 }
 
+
+int connect_x(int socket,struct sockaddr_in * myAddr)
+{
+	int res = 0;
+	int i = 0;
+	res = connect(socket,(struct sockaddr*)myAddr,sizeof(struct sockaddr_in));
+	ERR(res,-1,"connect fail ! ",err_return);
+
+	return socket;
+}
 /*int create_socket_x(address_x * myAddr)
 {
 	int mysock = socket(PF_INET,SOCK_STREAM,0);

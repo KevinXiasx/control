@@ -28,5 +28,4 @@
             } while (0)
 
 
-
 #endif /* PROJECT_HEAD_H_ */

@@ -33,5 +33,5 @@ private:
 	
 };
 
-
+int connect_x(int socket,struct sockaddr_in * myAddr);
 #endif /* SOCKET_CONTROL_H_ */

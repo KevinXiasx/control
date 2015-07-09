@@ -1,0 +1,11 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+accept_x	socket_control.c	/^int accept_x(int socket,address_x * myAddr)$/;"	f
+address_init	socket_control.c	/^int address_init(address_x * addr)$/;"	f
+connect_x	socket_control.c	/^int connect_x(int socket,address_x * myAddr)$/;"	f
+create_socket_x	socket_control.c	/^int create_socket_x(address_x * myAddr)$/;"	f
+listen_x	socket_control.c	/^int listen_x(int socket)$/;"	f

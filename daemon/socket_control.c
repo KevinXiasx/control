@@ -1,10 +1,13 @@
 #include "socket_control.h"
 #include "project_head.h"
 
-int address_init(address_x * addr)
+int address_init(address_x * addr,const char * ips, int fport)
 {
 	addr->myaddr.sin_family = AF_INET;
-	addr->myaddr.sin_port = htons(port);
+	addr->port = fport;
+	addr->myaddr.sin_port = htons(fport);
+	memset(addr->ip,0,sizeof(addr->ip));
+	memcpy(addr->ip,ips,strlen(ips));
 	int res = inet_aton(addr->ip,&(addr->myaddr.sin_addr));
 }
 
@@ -15,18 +18,20 @@ int address_init(address_x * addr)
 //argument: struct about address
 //return : succese--(socket id),err--(-1)
 //------------------------------------------------------------------------------------------------------------
-int create_socket_x(address_x * myAddr)
+int create_socket_x(int port)
 {
+	struct sockaddr_in myaddr;
+	myaddr.sin_family = AF_INET;
 	int mysock = socket(PF_INET,SOCK_STREAM,0);
 	ERR(mysock,-1,"socket create fail !",err_return);
 
-	myAddr->myaddr.sin_port = htons(port);
-	myAddr->myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	myaddr.sin_port = htons(port);
+	myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	int opt = 1;
 	setsockopt(mysock,SOL_SOCKET,SO_REUSEADDR,&opt,sizeof(opt));
 
-	int res = bind(mysock,(struct sockaddr*)(&(myAddr->myaddr)),sizeof(struct sockaddr_in));
-	ERR(res,-1,"blind address is fail ! ",err_return);
+/*	int res = bind(mysock,(struct sockaddr*)(&myaddr),sizeof(struct sockaddr_in));
+	ERR(res,-1,"blind address is fail ! ",err_return);*/
 
 	return mysock;
 }
@@ -41,10 +46,17 @@ int listen_x(int socket)
 int accept_x(int socket,address_x * myAddr)
 {
 	int res = 0;
-	scoklen_t len = 0;
+	socklen_t len = 0;
 	if ( myAddr == NULL)
-		
-	res = accept(socket,(struct sockaddr*)(&(myAddr->myaddr)),&len);
+	{
+		printf("herer\n");
+		res = accept(socket,NULL,NULL);
+	}
+	else
+	{
+		printf("111herer\n");
+		res = accept(socket,(struct sockaddr*)(&(myAddr->myaddr)),&len);
+	}
 	ERR(res,-1,"accept is fail ! ",err_return);
 	return res;
 }
@@ -52,6 +64,7 @@ int accept_x(int socket,address_x * myAddr)
 int connect_x(int socket,address_x * myAddr)
 {
 	int res = 0;
+	int i = 0;
 	res = connect(socket,(struct sockaddr*)(&(myAddr->myaddr)),sizeof(struct sockaddr_in));
 	ERR(res,-1,"connect fail ! ",err_return);
 
