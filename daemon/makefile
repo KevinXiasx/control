@@ -7,7 +7,7 @@ obj=$(src:%.c=%.o)
 $(ELF):$(obj)
 	$(cc) -o $(ELF) $(^) $(LIB)
 
-.cpp.o:
+.c.o:
 	$(cc) -c $(<D)/$(<F) -o $(@D)/$(@F) $(LIB)
 clean:
 	rm -rf $(ELF) $(obj)

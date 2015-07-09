@@ -5,12 +5,14 @@
 int main(int argc, char const *argv[])
 {
 	Address addr;
-	if(!addr.init("127.0.0.1",atoi(argv[1])))
+	if(!addr.init("127.0.0.1",2223))
 		return 0;
 	Socket sock;
-	if(!sock.create_socket(atoi(argv[1])))
+	if(!sock.create_socket())
 		return 0;
-/*	if(!sock.listen_socket())
+/*	if(!sock.bind_socket(2223))
+		return 0;
+	if(!sock.listen_socket())
 		return 0;
 	int newfd = sock.accept_socket();
 	if(newfd != -1)

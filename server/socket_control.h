@@ -23,7 +23,8 @@ class Socket
 {
 public:
 
-	bool create_socket(int port);
+	bool create_socket();
+	bool bind_socket(int port);
 	bool listen_socket(int max = SOMAXCONN);
 	int accept_socket(Address * client_addr = NULL);
 	bool connect_socket(Address * addr);

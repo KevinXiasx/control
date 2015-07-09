@@ -16,7 +16,8 @@ typedef struct addres{
 int address_init(address_x * addr,const char * ips, int fport);
 
 
-int create_socket_x(int port);
+int create_socket_x();
+int bind_x(int socket,int port);
 int listen_x(int socket);
 int accept_x(int socket,address_x * myAddr);
 int connect_x(int socket,address_x * myAddr);
