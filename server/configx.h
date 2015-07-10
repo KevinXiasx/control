@@ -1,17 +1,12 @@
 #ifndef CONFIGX_H_
 #define CONFIGX_H_ 
 
-#include <iostream>
 #include <cstring>
 #include <fstream>
 #include <map>
 #include <vector>
 #include <list>
-#include <pthread.h>
 #include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
 #include <algorithm>

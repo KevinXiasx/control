@@ -1,5 +1,13 @@
 #include "socket_control.h"
 
+Address::rinit()
+{
+	assert(myaddr!=NULL);
+	port = ntohs(myaddr->sin_port);
+	char iptem[32];
+	ip = inet_ntop(AF_INET,myaddr,iptem,sizeof(iptem));
+}
+
 bool Address::init(string ip, int port)
 {
 	this->ip = ip;
@@ -52,7 +60,7 @@ int Socket::accept_socket(Address * client_addr)
 	ERR(res,-1,"accept is fail ! ",err_return);
 	return res;
 }
-bool Socket::connect_socket(Address * addr)
+bool Socket::connect_socket(const Address * addr)
 {
 	int res = 0;
 	res = connect(mysocketFd,(struct sockaddr*)(&(addr->myaddr)),sizeof(struct sockaddr_in));

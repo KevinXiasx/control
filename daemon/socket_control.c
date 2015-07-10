@@ -13,11 +13,6 @@ int address_init(address_x * addr,const char * ips, int fport)
 
 
 
-//------------------------------------------create_socket()----------------------------------------------
-//function:create a new socket
-//argument: struct about address
-//return : succese--(socket id),err--(-1)
-//------------------------------------------------------------------------------------------------------------
 int create_socket_x()
 {
 	int mysock = socket(PF_INET,SOCK_STREAM,0);
@@ -73,50 +68,3 @@ int connect_x(int socket,address_x * myAddr)
 
 	return socket;
 }
-
-
-
-/*void address_init(const void * input, void * output)
-{
-	printf("1\n");
-	int res = 0;
-	address_x * addr_input = (address_x * )input;
-	addr_input->myaddr.sin_family = AF_INET;
-	addr_input->myaddr.sin_port = htons(addr_input->port);
-	res = inet_aton(addr_input->ip,&(addr_input->myaddr.sin_addr));
-	if(res == 0)
-	{
-		perror("address trans fail ! ");
-		*(bool_t *)output = false;
-	}
-	else
-	*(bool_t *)output = true;
-	printf("1.1\n");
-}
-
-void address_destroy(const void * input, void * output)
-{
-	printf("2\n");
-	*(bool_t *)output = true;
-}
-void address_less(const void * input1, const void * input2,void * output)
-{
-	printf("3\n");
-	*(bool_t *)output = true;
-}
-void address_copy(const void * input1, const void * input2,void * output)
-{
-	printf("4\n");
-
-	address_x* a = (address_x*)input1;
-	address_x* b = (address_x*)input2;
-
-	printf("port out = %d\n",a->port);
-	printf("port in = %d\n",b->port);
-
-	memcpy(a,b,sizeof(address_x));
-	printf("i'm here\n");
-	*(bool_t *)output = true;
-}*/
-
-

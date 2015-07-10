@@ -2,8 +2,13 @@
 
 int main(int argc, char const *argv[])
 {
+	if(argc<3)
+	{
+		printf("argument is too few\n");
+		return 0;
+	}
 	address_x addr;
-	address_init(&addr,"127.0.0.1",2223);
+	address_init(&addr,argv[1],argv[2]);
 	int sockfd = create_socket_x();
 	if(sockfd == -1)
 		return 0;

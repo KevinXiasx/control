@@ -11,13 +11,17 @@ using namespace std;
 class Address
 {
 public:
-
+	Address(struct sockaddr_in* myaddr);
 	bool init(string ip, int port);
 
 	int port;
 	string ip;
-	struct sockaddr_in myaddr;
+	struct sockaddr_in myaddr;		
+	int socketfd;                    //be used in transmission between pthread and pthread
 };
+
+
+#define CONST_PORT 2223
 
 class Socket
 {
@@ -27,7 +31,7 @@ public:
 	bool bind_socket(int port);
 	bool listen_socket(int max = SOMAXCONN);
 	int accept_socket(Address * client_addr = NULL);
-	bool connect_socket(Address * addr);
+	bool connect_socket(const Address * addr);
 	int mysocketFd;
 private:
 	

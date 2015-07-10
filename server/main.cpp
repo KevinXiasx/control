@@ -5,7 +5,7 @@
 int main(int argc, char const *argv[])
 {
 	Address addr;
-	if(!addr.init("127.0.0.1",2223))
+	if(!addr.init(argv[1],atoi(argv[2])))
 		return 0;
 	Socket sock;
 	if(!sock.create_socket())

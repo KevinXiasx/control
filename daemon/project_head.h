@@ -1,12 +1,13 @@
-#ifndef PROJECT_HEAD_H_
-#define PROJECT_HEAD_H_
+#ifndef ERR_OPERAT_H_
+#define ERR_OPERAT_H_
+
 
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <assert.h>
 
-//-------------------------------------------------------err produce-----------------------------------------
+//--------------------------------------err produce-----------------------------------------
 #define err_return -1
 #define err_nreturn 0
 
@@ -27,5 +28,12 @@
                }                                                \
             } while (0)
 
+#define DEBUG(x)                \
+            do{                     \
+                if(sizeof((x))==sizeof(int))      \
+                    printf(""#x" = %d\n", (x));      \
+                else                              \
+                    printf(""#x" = %s\n", (x));      \
+            }while(0)   
 
 #endif /* PROJECT_HEAD_H_ */
