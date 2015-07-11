@@ -11,8 +11,10 @@ using namespace std;
 class Address
 {
 public:
+	Address();
 	Address(struct sockaddr_in* myaddr);
 	bool init(string ip, int port);
+	void rinit();
 
 	int port;
 	string ip;

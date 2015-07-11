@@ -15,11 +15,11 @@ int main(int argc, char **argv)
       printf("%d:Error %u: %s\n",__LINE__, mysql_errno(conn), mysql_error(conn));
       exit(1);
   } 
-  if (mysql_query(conn, "create table testtable2"))
+/*  if (mysql_query(conn, "create database testdata2"))
   {
       printf("Error %u: %s\n", mysql_errno(conn), mysql_error(conn));
       exit(1);
-  }
+  }*/
   mysql_close(conn);
   return 0;
 }

@@ -1,7 +1,8 @@
 #ifndef CONFIGX_H_
 #define CONFIGX_H_ 
 
-#include <cstring>
+#include <string.h>
+#include <iostream>
 #include <fstream>
 #include <map>
 #include <vector>
@@ -10,6 +11,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <algorithm>
+#include <fcntl.h>
 
 using namespace std;
 
