@@ -46,6 +46,12 @@ using namespace std;
                     printf(""#x" = %s\n", (x));      \
             }while(0)   
 
+#define DEBUGW               \
+            do{                 \
+                cout<<"line:"<<__LINE__<<endl;  \
+            }while(0);          \
+
+
 #endif 
 
 //-----------------------------------------message define------------------------------------

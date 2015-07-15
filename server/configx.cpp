@@ -1,6 +1,5 @@
 #include "configx.h"
 
-
 Configx::Configx()
 {
 	//标准配置项目

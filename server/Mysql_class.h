@@ -1,13 +1,15 @@
-#ifndef MYSQLCLASS
-#define MYSQLCLASS 
+#ifndef MYSQLCLASS_H_
+#define MYSQLCLASS_H_
 
 #include <mysql.h>
+#include <iostream>
+#include <vector>
+#include "project_head.h"
+#include <cstring>
+
 #include <my_global.h>
-#include <string.h>
-#include "configx.h"
 
 using namespace std;
-
 
 class MysqlClass
 {
@@ -18,7 +20,7 @@ public:
 	bool connect_mysql();
 	bool data_mysql(string sql);
 
-	// vector<string> select_mysql(string sql);
+	vector<string> select_mysql(string sql);
 private:
 	MYSQL* sqlpr;
 };

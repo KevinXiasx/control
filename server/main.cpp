@@ -1,9 +1,21 @@
 #include "socket_control.h"
-//#include "configx.h"
+#include "configx.h"
 #include "pthread_class.h"
+#include "Mysql_class.h"
 
 int main(int argc, char const *argv[])
 {
+	MysqlClass mysql;
+	mysql.connect_mysql();
+	return 0;
+
+
+
+
+
+
+
+
 /*	Address addr;
 	if(!addr.init(argv[1],atoi(argv[2])))
 		return 0;
