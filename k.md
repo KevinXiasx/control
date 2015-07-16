@@ -25,6 +25,6 @@ dog's back.
 ```
 
 * A list item.
-  With multiple paragraphs.
+      With multiple paragraphs.
 
 * Another item in the list.
