@@ -23,3 +23,8 @@ dog's back.
 ```
 # sudo apt-get install sublime-text3-installer
 ```
+
+* A list item.
+With multiple paragraphs.
+
+* Another item in the list.
