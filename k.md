@@ -24,14 +24,14 @@ dog's back.
 # sudo apt-get install sublime-text3-installer
 ```
 
-* A list item.
+* A list item.  
       With multiple paragraphs.
 
 * Another item in the list.
 
 This is an [example link](http://example.com/ "With a Title").
 
-This is an ![example link](http://radxa.com/mw/images/4/47/Remmina_pw.png).
+This is an ![example link](http://radxa.com/mw/images/4/47/Remmina_pw.png).  
 This is an ![image](http://radxa.com/mw/images/4/47/Remmina_pw.png).
 I start my morning with a cup of coffee and
 [The New York Times][NY Times].
