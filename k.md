@@ -29,17 +29,12 @@ dog's back.
 
 * Another item in the list.
 
-This is an [example link](http://example.com/ "With a Title").
+*   Bird
+*   Magic  
 
-This is an ![example link](http://radxa.com/mw/images/4/47/Remmina_pw.png).  
-This is an ![image](http://radxa.com/mw/images/4/47/Remmina_pw.png).
-I start my morning with a cup of coffee and
-[The New York Times][NY Times].
+*   Bird
 
-[ny times]: http://www.nytimes.com/
-
-If you want your page to validate under XHTML 1.0 Strict,
-you've got to put paragraph tags in your blockquotes:
+*   Magic
 
 <blockquote>
 <p>For example.</p>
