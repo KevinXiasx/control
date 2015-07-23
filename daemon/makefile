@@ -1,4 +1,4 @@
-cc=gcc -g 
+cc= gcc -g 
 LIB= -lpthread -lrt 
 ELF=main
 src=$(shell find ./ -name '*.c')
@@ -9,8 +9,10 @@ $(ELF):$(obj)
 
 .c.o:
 	$(cc) -c $(<D)/$(<F) -o $(@D)/$(@F) $(LIB)
+
 clean:
 	rm -rf $(ELF) $(obj)
 all:
 	echo $(src)
-	
+
+#   arm-linux-gnueabihf- -static -L. 

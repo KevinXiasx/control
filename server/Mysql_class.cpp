@@ -1,13 +1,30 @@
 #include "Mysql_class.h"
+#include "myio.h"
+
+bool MysqlClass::connect = true;
+MysqlClass* MysqlClass::myclass = NULL;
+
+MysqlClass* MysqlClass::createsql()
+{
+	if(myclass == NULL)
+	{
+		myclass = new MysqlClass;
+		if(!connect)
+			myclass = NULL;
+	}
+	return myclass;
+}
 
 MysqlClass::MysqlClass()
 {
 	sqlpr = NULL;
+	connect = connect_mysql();
 }
 
 MysqlClass::~MysqlClass()
 {
 	mysql_close(sqlpr);
+	myclass = NULL;
 }
 
 bool MysqlClass::data_mysql(string sql)
@@ -61,11 +78,13 @@ vector<string> MysqlClass::select_mysql(string sql)
 	vector<string> v;
 	if( !data_mysql(sql) )
 		return v;
+	DEBUGW;
 	MYSQL_RES *res_set;
 	res_set = mysql_store_result(sqlpr);
 	if(res_set == NULL)
 		return v;
 	MYSQL_ROW row;
+	DEBUGW;
     while ((row = mysql_fetch_row(res_set)) != NULL)
     {
         for(int i=0;i<mysql_num_fields(res_set);i++)
@@ -73,6 +92,7 @@ vector<string> MysqlClass::select_mysql(string sql)
             v.push_back(row[i]);
         }
     }
+    DEBUGW;
     if(mysql_errno(sqlpr) != 0)
     {
     	v.clear();
@@ -80,4 +100,17 @@ vector<string> MysqlClass::select_mysql(string sql)
     }
 	mysql_free_result(res_set);
 	return v;
+}
+
+
+void MysqlClass::show()
+{
+	Myio* io = Myio::createio();
+	char st1[100];
+	std::vector<string> v = select_mysql("select * from ipaddress where heart='y'");
+	for(int i=0;i < v.size(); i=i+3)
+	{
+		sprintf(st1,"%-10s%-20s\n",v[i].c_str(),v[i+1].c_str());
+		io->myout(st1);
+	}
 }

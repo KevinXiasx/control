@@ -27,14 +27,22 @@
                     }               \
                }                                                \
             } while (0)
-
-#define DEBUG(x)                \
+            
+#define DEBUGS(x)                \
             do{                     \
-                if(sizeof((x))==sizeof(int))      \
-                    printf(""#x" = %d\n", (x));      \
-                else                              \
-                    printf(""#x" = %s\n", (x));      \
+                printf(""#x" = %s\n", (x));      \
             }while(0)   
+
+#define DEBUGI(x)                \
+            do{                     \
+                printf(""#x" = %d\n", (int)(x));      \
+            }while(0)              
+
+#define DEBUGW               \
+            do{                 \
+                cout<<"file:"<<__FILE__<<"  line:"<<__LINE__<<endl;  \
+            }while(0);          \
+
 
 
 #endif /* PROJECT_HEAD_H_ */

@@ -5,11 +5,15 @@
 #include "myio.h"
 #include "pool.h"
 
-Myio* Myio::me = NULL;
+
+void exit1();
 
 int main(int argc, char const *argv[])
 {
 
+	atexit(exit1);
+	Pthread_x communi;
+	communi.run(communicate);
 
 	mainlist();
 
@@ -49,4 +53,11 @@ int main(int argc, char const *argv[])
 		cout<<"res ="<<res<<endl;
 	}*/
 	return 0;
+}
+
+
+void exit1()
+{
+	MysqlClass* data = MysqlClass::createsql();	
+	delete data;
 }

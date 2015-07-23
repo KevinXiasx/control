@@ -1,6 +1,8 @@
 #include "myio.h"
 
 
+Myio* Myio::me = NULL;
+
 
 Myio::Myio()
 {
@@ -19,7 +21,8 @@ Myio* Myio::createio()
 string Myio::myin()
 {
 	char tmp[1024] = {0};
-	read(infd,tmp,1024);
+	int seek = read(infd,tmp,1024);
+	*(tmp+seek-1) = 0;
 	string k = tmp;
 	return k;
 }

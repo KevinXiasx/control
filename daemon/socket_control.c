@@ -29,6 +29,8 @@ int bind_x(int socket,int port)
 	myaddr.sin_family = AF_INET;
 	myaddr.sin_port = htons(port);
 	myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+
+
 	int res = bind(socket,(struct sockaddr*)(&myaddr),sizeof(struct sockaddr_in));
 	ERR(res,-1,"blind address is fail ! ",err_return);
 }

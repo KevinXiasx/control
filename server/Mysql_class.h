@@ -14,15 +14,22 @@ using namespace std;
 class MysqlClass
 {
 public:
-	MysqlClass();
+	static MysqlClass* createsql();
 	~MysqlClass();
 
 	bool connect_mysql();
 	bool data_mysql(string sql);
 
 	vector<string> select_mysql(string sql);
+
+	void show();
+
 private:
+	MysqlClass();
 	MYSQL* sqlpr;
+	static MysqlClass* myclass;
+
+	static bool connect;
 };
 
 #endif

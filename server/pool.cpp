@@ -1,27 +1,35 @@
 #include "pool.h"
 #include "Mysql_class.h"
 #include <vector>
+#include "myio.h"
 
+//======================================accpet============================
 void beatheart(Address* addr)
 {
-
-	MysqlClass data;
+	Myio* io = Myio::createio();
+	MysqlClass* data = MysqlClass::createsql();
+	if(data == NULL)
+	{
+		io->myerr("mysql can`t connect ,date save fail");
+		return;
+	}
 	addr->rinit();
-	if( !data.connect_mysql() )
-		return ;
 	char sql[300] = {0};
 	sprintf(sql,"select * from ipaddress where ip='%s'",addr->ip.c_str());
 	string sql_str = sql;
-	std::vector<string> v = data.select_mysql(sql_str);
+	DEBUGS(sql);
+	std::vector<string> v = data->select_mysql(sql_str);
 	if(v.size() == 0)
 	{
 		sprintf(sql,"insert into ipaddress(id,ip,heart) values(null,'%s','y')",addr->ip.c_str());
-		data.data_mysql(sql);
+		DEBUGS(sql);
+		data->data_mysql(sql);
 	}
 	else
 	{
 		sprintf(sql,"update ipaddress set heart='y' where ip='%s'",addr->ip.c_str());
-		data.data_mysql(sql);
+		DEBUGS(sql);
+		data->data_mysql(sql);
 	}
 }
 
@@ -40,70 +48,116 @@ int mainlist()
 	{
 		Address * addrbuf = new Address;
 		newfd = sock.accept_socket(addrbuf);
+		DEBUGI(newfd);
 		if(newfd == -1)
 		{
 			delete addrbuf;
 			continue;
 		}
 		addrbuf->socketfd = newfd;
-		Pthread_x pth;
-		pth.run(guard,addrbuf);
+		beatheart(addrbuf);
+		delete addrbuf;
+		close(newfd);
 	}
 }
+//----------------------------------accpet-------------------------
 
-void* guard(void* argument)
+
+//==================================shell============================
+
+bool getdevice(vector<string> *v)
 {
-	Address* addr = (Address*)argument;
-	addr->rinit();
-
-	Message msgclass;
-	if(msgclass.recvmsg(addr)==-1)
+	Myio* io = Myio::createio();
+	MysqlClass* data = MysqlClass::createsql();
+	if(data == NULL)
 	{
-		delete addr;
-		return NULL;
+		io->myerr("mysql can`t connect ,date select fail");
+		return false;
 	}
-	switch( msgclass.getId() )                         //need  some care
+	io->myout("if choose all device,input 'all' ,else 'show' show all device,'q' quit\n");
+	string in1 = io->myin();
+	if(in1 == "all")
 	{
-		case ID_HEART:
-			beatheart(addr);
-			break;
-		case ID_ANSWR:
-			break;
-		default:
-			beatheart(addr);
-			break;
+		*v = data->select_mysql("select ip from ipaddress where heart='y'");
+		if(v->size() == 0)
+		{
+			io->myout("hasn`t device !\n");
+			return false;
+		}
 	}
-	delete addr;
+	else if(in1 == "show")
+	{
+		data->show();
+	}
+	else if(atoi(in1.c_str()) != 0)
+	{
+		char st1[100] = {0};
+		sprintf(st1,"select ip from ipaddress where id=%d",atoi(in1.c_str()));
+		*v = data->select_mysql(st1);
+		if(v->size() == 0)
+		{
+			io->myout("hasn`t device !\n");
+			return false;
+		}
+	}
+	else if( in1 == "q")
+	{
+		return false;
+	}
+	else
+	{
+		io->myout("illegal input\n");
+		return false;
+	}
+	return true;
 }
 
 
-void* forward(void* argument)
+bool exeshell()
 {
-	string * command = (string *)argument;
+	std::vector<string> devices;
+	if( !getdevice(&devices) )
+		return false;
 
 }
 
+
+
+
+//-----------------------------------shell----------------------------------------
 
 void* communicate(void * argument)
 {
+	Myio* io = Myio::createio();
+	MysqlClass* data = MysqlClass::createsql();
+	char st1[100] = {0};
+	std::vector<string> v = data->select_mysql("select * form ipaddress where heart='y'");
+	sprintf(st1,"online devices about %d\n",v.size());
+	io->myout(st1);
+
 	string she;
 	while(1)
 	{
-		cout<<"-1-  translate files\n";
-		cout<<"-2-  execute program\n";
-		cout<<"Your Choose :";
-		cin>>she;
+		io->myout("-q-  Quit\n");
+		io->myout("-1-  translate files\n");
+		io->myout("-2-  shell \n");
+		io->myout("Your Choose :");
+		she = io->myin();
 		if(she == "1")
 		{
 
 		}
+		else if(she == "q")
+		{
+			exit(0);
+		}
 		else if(she == "2" )
 		{
-
+			exeshell();
 		}
-		else
+		else 
 		{
-			cout<<"choose illegal !\n";
+			io->myout("choose illegal !\n");
 		}
 	}
 }

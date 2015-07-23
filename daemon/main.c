@@ -10,14 +10,17 @@ int main(int argc, char const *argv[])
 	address_x addr;
 	address_init(&addr,argv[1],atoi(argv[2]));
 	int sockfd = create_socket_x();
+	
 	if(sockfd == -1)
 		return 0;
 	if( connect_x(sockfd,&addr) == -1)
 		return 0;
-	else
+	close(sockfd);
+/*	else
 		send(sockfd,&(addr.port),4,0);
-	
-/*	bind_x(sockfd,2223);
+	*/
+/*	
+	bind_x(sockfd,2223);
 	listen_x(sockfd);
 	int newfd = accept_x(sockfd,&addr);
 */

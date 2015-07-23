@@ -7,9 +7,6 @@
 #include "socket_control.h"
 
 int mainlist();
-void* guard(void* argument);
-
-void* forward(void* argument);
 
 
 void* communicate(void * argument);

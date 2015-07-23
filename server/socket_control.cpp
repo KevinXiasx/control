@@ -8,8 +8,8 @@ Address::Address()
 void Address::rinit()
 {
 	port = ntohs(myaddr.sin_port);
-	char iptem[32];
-	ip = inet_ntop(AF_INET,&myaddr,iptem,sizeof(iptem));
+	char iptem[INET_ADDRSTRLEN];
+	ip = inet_ntop(AF_INET,&myaddr.sin_addr,iptem,INET_ADDRSTRLEN);
 }
 
 bool Address::init(string ip, int port)
@@ -56,7 +56,7 @@ bool Socket::listen_socket(int max)
 int Socket::accept_socket(Address * client_addr)
 {
 	int res = 0;
-	socklen_t len = 0;
+	socklen_t len = sizeof(struct sockaddr_in);
 	if(client_addr == NULL)
 		res = accept(mysocketFd,NULL,NULL);
 	else
@@ -64,6 +64,7 @@ int Socket::accept_socket(Address * client_addr)
 	ERR(res,-1,"accept is fail ! ",err_return);
 	return res;
 }
+
 bool Socket::connect_socket(const Address * addr)
 {
 	int res = 0;
