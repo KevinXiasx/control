@@ -38,17 +38,19 @@ using namespace std;
                }                                                \
             } while (0)
 
-#define DEBUG(x)                \
+#define DEBUGS(x)                \
             do{                     \
-                if(sizeof((x))==sizeof(int))      \
-                    printf(""#x" = %d\n", (x));      \
-                else                              \
-                    printf(""#x" = %s\n", (x));      \
+                printf(""#x" = %s\n", (x));      \
             }while(0)   
+
+#define DEBUGI(x)                \
+            do{                     \
+                printf(""#x" = %d\n", (int)(x));      \
+            }while(0)              
 
 #define DEBUGW               \
             do{                 \
-                cout<<"line:"<<__LINE__<<endl;  \
+                cout<<"file:"<<__FILE__<<"  line:"<<__LINE__<<endl;  \
             }while(0);          \
 
 
@@ -59,22 +61,33 @@ using namespace std;
 #ifndef MSG_H_
 #define MSG_H_ 
 
-#define ID_SHELL 1
-#define ID_TFILE 2
+#define ID_HEART 0
+#define ID_ANSWR 1
+#define ID_SHELL 2
+#define ID_TFILE 3
 #define ID_
 
 typedef union u_msg{
     unsigned id;
+    struct 
+    {
+        unsigned id;
+        unsigned torf;
+        unsigned errlen;
+    } answer_m;
+
     struct {
         unsigned id;
         unsigned shellen;
     } shell_m;
+
     struct {
         unsigned id;
         unsigned mode;
         unsigned path;
         unsigned size;
-    } cfile_m;
+    } tfile_m;
+
 }U_MSG;
 
 #endif

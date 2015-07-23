@@ -14,6 +14,8 @@ bool MysqlClass::data_mysql(string sql)
 {
 	if(mysql_real_query(sqlpr, sql.c_str(),sql.size()+1) == NULL)
 	{
+		if(mysql_errno(sqlpr) == 0 )
+			return true;
 		printf("Error %u: %s\n", mysql_errno(sqlpr), mysql_error(sqlpr));
 		return false;
 	}
@@ -28,22 +30,19 @@ bool MysqlClass::connect_mysql()
 		printf("line :%d Error %u: %s\n",__LINE__, mysql_errno(sqlpr), mysql_error(sqlpr));
 		return false;
 	}
- 	while(mysql_real_connect(sqlpr, NULL, "root", "danjina", "androiad_divice", 0, NULL, 0) == NULL) 
+ 	while(mysql_real_connect(sqlpr, NULL, "root", "danjina", "android_divice", 0, NULL, 0) == NULL) 
 	{
 		printf("line :%d Error %u: %s\n",__LINE__, mysql_errno(sqlpr), mysql_error(sqlpr));
 		if( mysql_errno(sqlpr) == 1049 )
 		{
 			if(mysql_real_connect(sqlpr, NULL, "root", "danjina", NULL, 0, NULL, 0) != NULL)
 			{
-				DEBUGW;
-				if(data_mysql("create database androiad_divice"))
+				if(data_mysql("create database android_divice"))
 				{
-					DEBUGW;
 					continue;
 				}
 				else
 				{
-					DEBUGW;
 					mysql_close(sqlpr);
 					continue;
 				}
@@ -51,13 +50,10 @@ bool MysqlClass::connect_mysql()
 		}
 		else
 		{
-			DEBUGW;
 			return false;
 		}
 	}
-	DEBUGW;
-	return data_mysql("create table if not exists ipaddress(id int not null primary key,ip char(15) not null)");
-
+	return data_mysql("create table if not exists ipaddress(id int primary key AUTO_INCREMENT,ip char(15) not null,heart char(1) not null)");
 }
 
 vector<string> MysqlClass::select_mysql(string sql)
@@ -67,6 +63,8 @@ vector<string> MysqlClass::select_mysql(string sql)
 		return v;
 	MYSQL_RES *res_set;
 	res_set = mysql_store_result(sqlpr);
+	if(res_set == NULL)
+		return v;
 	MYSQL_ROW row;
     while ((row = mysql_fetch_row(res_set)) != NULL)
     {

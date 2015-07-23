@@ -7,7 +7,6 @@ Address::Address()
 
 void Address::rinit()
 {
-//	assert(myaddr!=NULL);
 	port = ntohs(myaddr.sin_port);
 	char iptem[32];
 	ip = inet_ntop(AF_INET,&myaddr,iptem,sizeof(iptem));

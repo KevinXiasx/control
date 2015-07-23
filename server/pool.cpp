@@ -1,4 +1,30 @@
 #include "pool.h"
+#include "Mysql_class.h"
+#include <vector>
+
+void beatheart(Address* addr)
+{
+
+	MysqlClass data;
+	addr->rinit();
+	if( !data.connect_mysql() )
+		return ;
+	char sql[300] = {0};
+	sprintf(sql,"select * from ipaddress where ip='%s'",addr->ip.c_str());
+	string sql_str = sql;
+	std::vector<string> v = data.select_mysql(sql_str);
+	if(v.size() == 0)
+	{
+		sprintf(sql,"insert into ipaddress(id,ip,heart) values(null,'%s','y')",addr->ip.c_str());
+		data.data_mysql(sql);
+	}
+	else
+	{
+		sprintf(sql,"update ipaddress set heart='y' where ip='%s'",addr->ip.c_str());
+		data.data_mysql(sql);
+	}
+}
+
 
 int mainlist()
 {
@@ -36,11 +62,15 @@ void* guard(void* argument)
 		delete addr;
 		return NULL;
 	}
-	switch( msgclass.getId() )                         //need to some care
+	switch( msgclass.getId() )                         //need  some care
 	{
-		case ID_SHELL:
+		case ID_HEART:
+			beatheart(addr);
+			break;
+		case ID_ANSWR:
 			break;
 		default:
+			beatheart(addr);
 			break;
 	}
 	delete addr;

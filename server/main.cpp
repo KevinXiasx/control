@@ -2,18 +2,26 @@
 #include "configx.h"
 #include "pthread_class.h"
 #include "Mysql_class.h"
+#include "myio.h"
+#include "pool.h"
+
+Myio* Myio::me = NULL;
 
 int main(int argc, char const *argv[])
 {
-	MysqlClass mysql;
+
+
+	mainlist();
+
+/*	Myio* k = Myio::createio();
+	string s = k->myin();
+	k->myout(s);*/
+
+
+/*	MysqlClass mysql;
 	mysql.connect_mysql();
 	return 0;
-
-
-
-
-
-
+*/
 
 
 /*	Address addr;

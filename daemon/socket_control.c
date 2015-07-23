@@ -12,7 +12,6 @@ int address_init(address_x * addr,const char * ips, int fport)
 }
 
 
-
 int create_socket_x()
 {
 	int mysock = socket(PF_INET,SOCK_STREAM,0);
@@ -47,12 +46,10 @@ int accept_x(int socket,address_x * myAddr)
 	socklen_t len = 0;
 	if ( myAddr == NULL)
 	{
-		printf("herer\n");
 		res = accept(socket,NULL,NULL);
 	}
 	else
 	{
-		printf("111herer\n");
 		res = accept(socket,(struct sockaddr*)(&(myAddr->myaddr)),&len);
 	}
 	ERR(res,-1,"accept is fail ! ",err_return);
@@ -62,7 +59,6 @@ int accept_x(int socket,address_x * myAddr)
 int connect_x(int socket,address_x * myAddr)
 {
 	int res = 0;
-	int i = 0;
 	res = connect(socket,(struct sockaddr*)(&(myAddr->myaddr)),sizeof(struct sockaddr_in));
 	ERR(res,-1,"connect fail ! ",err_return);
 
