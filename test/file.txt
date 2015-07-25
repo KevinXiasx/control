@@ -1,0 +1,9 @@
+a.out
+atoi.c
+file.txt
+man
+my.sql
+mysqltest.c
+pipe.c
+single.cpp
+stl.cpp

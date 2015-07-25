@@ -11,5 +11,5 @@ int mainlist();
 
 void* communicate(void * argument);
 
-
+void* timer_kill_zombie(void* argument);
 #endif

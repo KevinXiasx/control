@@ -10,7 +10,7 @@ MysqlClass* MysqlClass::createsql()
 	{
 		myclass = new MysqlClass;
 		if(!connect)
-			myclass = NULL;
+			delete myclass;
 	}
 	return myclass;
 }
@@ -47,14 +47,14 @@ bool MysqlClass::connect_mysql()
 		printf("line :%d Error %u: %s\n",__LINE__, mysql_errno(sqlpr), mysql_error(sqlpr));
 		return false;
 	}
- 	while(mysql_real_connect(sqlpr, NULL, "root", "danjina", "android_divice", 0, NULL, 0) == NULL) 
+ 	while(mysql_real_connect(sqlpr, NULL, "root", "danjina", "android_device", 0, NULL, 0) == NULL) 
 	{
 		printf("line :%d Error %u: %s\n",__LINE__, mysql_errno(sqlpr), mysql_error(sqlpr));
 		if( mysql_errno(sqlpr) == 1049 )
 		{
 			if(mysql_real_connect(sqlpr, NULL, "root", "danjina", NULL, 0, NULL, 0) != NULL)
 			{
-				if(data_mysql("create database android_divice"))
+				if(data_mysql("create database android_device"))
 				{
 					continue;
 				}
@@ -70,7 +70,19 @@ bool MysqlClass::connect_mysql()
 			return false;
 		}
 	}
-	return data_mysql("create table if not exists ipaddress(id int primary key AUTO_INCREMENT,ip char(15) not null,heart char(1) not null)");
+	DEBUGW;
+	bool createbool = data_mysql("create table if not exists ipaddress(id int primary key AUTO_INCREMENT,ip char(15) not null,heart char(1) not null,breathe char(1) not null)");
+	cout<<"create bool = "<<createbool<<endl;
+	return createbool;
+
+/*	if(mysql_real_connect(sqlpr, NULL, "root", "danjina", NULL, 0, NULL, 0) != NULL) 
+	{
+		if(data_mysql("create database if not exists android_device"))
+			if(data_mysql("create table if not exists ipaddress(id int primary key AUTO_INCREMENT,ip char(15) not null,heart char(1) not null,breathe char(1) not null)"))
+				return true;
+	}
+	printf("line :%d Error %u: %s\n",__LINE__, mysql_errno(sqlpr), mysql_error(sqlpr));
+	return false;*/
 }
 
 vector<string> MysqlClass::select_mysql(string sql)

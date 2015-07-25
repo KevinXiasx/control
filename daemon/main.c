@@ -1,28 +1,16 @@
 #include "socket_control.h"
+#include "config.h"
+#include "pthreadxsx.h"
+#include "contain.h"
+#include <unistd.h>
 
 int main(int argc, char const *argv[])
 {
-	if(argc<3)
-	{
-		printf("argument is too few\n");
-		return 0;
-	}
-	address_x addr;
-	address_init(&addr,argv[1],atoi(argv[2]));
-	int sockfd = create_socket_x();
-	
-	if(sockfd == -1)
-		return 0;
-	if( connect_x(sockfd,&addr) == -1)
-		return 0;
-	close(sockfd);
-/*	else
-		send(sockfd,&(addr.port),4,0);
-	*/
-/*	
-	bind_x(sockfd,2223);
-	listen_x(sockfd);
-	int newfd = accept_x(sockfd,&addr);
-*/
+	//pthread_run(timer_connect_host,NULL);
+
+	const_listen_host(NULL);
+
+	//timer_connect_host(NULL);
+
 	return 0;
 }

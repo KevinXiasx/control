@@ -78,7 +78,6 @@ typedef union u_msg{
 
     struct {
         unsigned id;
-        unsigned shellen;
     } shell_m;
 
     struct {
@@ -89,6 +88,7 @@ typedef union u_msg{
     } tfile_m;
 
 }U_MSG;
+
 
 #endif
 

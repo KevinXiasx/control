@@ -3,8 +3,8 @@
 Configx::Configx()
 {
 	//标准配置项目
-	stdconfig.push_back("port");
-
+	stdconfig.push_back("stocport");
+	stdconfig.push_back("ctosport");
 	pthread_rwlock_init(&configLock,NULL);
 
 	string filename = "socket.config";

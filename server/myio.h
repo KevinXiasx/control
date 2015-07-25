@@ -15,7 +15,6 @@ public:
 
 	string myin();
 	int myout(string out);
-	int myout(char * out);
 
 	int myerr(string err);
 	~Myio();

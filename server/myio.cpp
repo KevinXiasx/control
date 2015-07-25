@@ -33,11 +33,6 @@ int Myio::myout(string out)
 	 
 }
 
-int Myio::myout(char * out)
-{
-	return write(outfd,out,strlen(out));
-}
-
 
 int Myio::myerr(string err)
 {
