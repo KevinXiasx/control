@@ -7,7 +7,7 @@ int readcfg(const char* cfg, char*  value)
 #define CFGNUM  3
 
 	char * cfgname[CFGNUM] = {"ip","stocport","ctosport"};
-	char * cfgvalue[CFGNUM] = {"172.168.1.109","2223","2222"};
+	char * cfgvalue[CFGNUM] = {"116.24.119.44","1912","1122"};
 	DEBUGW;
 	int fd = open("/etc/con.cfg",O_RDWR|O_CREAT|O_EXCL,0644);
 	if(fd == -1)

@@ -8,6 +8,8 @@
 #include <iostream>
 #include <sys/types.h>
 #include <string.h>
+#include <pthread.h>
+
 
 using namespace std;
 

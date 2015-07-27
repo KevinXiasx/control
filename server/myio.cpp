@@ -20,6 +20,10 @@ Myio* Myio::createio()
 
 string Myio::myin()
 {
+	//
+	myout("\nkevin@: ");
+
+	//
 	char tmp[1024] = {0};
 	int seek = read(infd,tmp,1024);
 	*(tmp+seek-1) = 0;

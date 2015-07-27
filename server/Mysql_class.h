@@ -6,7 +6,6 @@
 #include <vector>
 #include "project_head.h"
 #include <cstring>
-
 #include <my_global.h>
 
 using namespace std;
@@ -28,6 +27,9 @@ private:
 	MysqlClass();
 	MYSQL* sqlpr;
 	static MysqlClass* myclass;
+
+	pthread_mutex_t sqlmutex;
+
 
 	static bool connect;
 };

@@ -6,11 +6,10 @@
 
 int main(int argc, char const *argv[])
 {
-	//pthread_run(timer_connect_host,NULL);
+	pthread_run(timer_connect_host,NULL);
 
 	const_listen_host(NULL);
 
 	//timer_connect_host(NULL);
-
 	return 0;
 }

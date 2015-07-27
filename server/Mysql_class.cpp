@@ -19,24 +19,31 @@ MysqlClass::MysqlClass()
 {
 	sqlpr = NULL;
 	connect = connect_mysql();
+	pthread_mutex_init(&sqlmutex,NULL);
 }
 
 MysqlClass::~MysqlClass()
 {
 	mysql_close(sqlpr);
 	myclass = NULL;
+	pthread_mutex_destroy(&sqlmutex);
 }
 
 bool MysqlClass::data_mysql(string sql)
 {
+	bool re = false;
+	pthread_mutex_lock(&sqlmutex);
 	if(mysql_real_query(sqlpr, sql.c_str(),sql.size()+1) == NULL)
 	{
 		if(mysql_errno(sqlpr) == 0 )
-			return true;
-		printf("Error %u: %s\n", mysql_errno(sqlpr), mysql_error(sqlpr));
-		return false;
+			re = true;
+		else
+			printf("Error %u: %s\n", mysql_errno(sqlpr), mysql_error(sqlpr));
 	}
-	return true;
+	else
+		re = true;
+	pthread_mutex_unlock(&sqlmutex);
+	return re;
 }
 
 bool MysqlClass::connect_mysql()
@@ -119,8 +126,8 @@ void MysqlClass::show()
 {
 	Myio* io = Myio::createio();
 	char st1[100];
-	std::vector<string> v = select_mysql("select * from ipaddress where heart='y'");
-	for(int i=0;i < v.size(); i=i+3)
+	std::vector<string> v = select_mysql("select id,ip from ipaddress where heart='y'");
+	for(int i=0;i < v.size(); i=i+2)
 	{
 		sprintf(st1,"%-10s%-20s\n",v[i].c_str(),v[i+1].c_str());
 		io->myout(st1);

@@ -19,7 +19,6 @@ int Message::recvmsg(Address * add)
 	return 0;
 }
 
-
 int Message::getSize() const
 {
 	switch( getId() )

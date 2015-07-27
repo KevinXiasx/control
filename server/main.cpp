@@ -12,15 +12,14 @@ int main(int argc, char const *argv[])
 {
 
 	atexit(exit1);
-/*	Pthread_x timerkill;
+	Pthread_x timerkill;
 	timerkill.run(timer_kill_zombie);
-*/	
+
 	Pthread_x communi;
 	communi.run(communicate);
 
 	mainlist();
 
-	//communicate(NULL);
 
 	return 0;
 }

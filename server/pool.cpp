@@ -86,6 +86,7 @@ bool killer(string ip)
 
 void* timer_kill_zombie(void* argument)
 {
+	sleep(1);
 	MysqlClass* data = MysqlClass::createsql();
 	if(data != NULL)
 	{
@@ -115,42 +116,46 @@ bool getdevice(vector<string> *v)
 		io->myerr("mysql can`t connect ,date select fail");
 		return false;
 	}
-	io->myout("-- all --  choose all device \n-- show -- show all device\n-- ID -- choose one of devices\n-- q -- quit\n");
-	string in1 = io->myin();
-	if(in1 == "all")
+	while(1)
 	{
-		*v = data->select_mysql("select ip from ipaddress where heart='y'");
-		if(v->size() == 0)
+		io->myout("-- all --  choose all device \n-- show -- show all device\n-- ID -- choose one of devices\n-- q -- quit\n");
+		string in1 = io->myin();
+		if(in1 == "all")
 		{
-			io->myout("hasn`t device !\n");
+			*v = data->select_mysql("select ip from ipaddress where heart='y'");
+			if(v->size() == 0)
+			{
+				io->myout("hasn`t device !\n");
+				return false;
+			}
+		}
+		else if(in1 == "show")
+		{
+			data->show();
+			continue;
+		}
+		else if(atoi(in1.c_str()) != 0)
+		{
+			char st1[100] = {0};
+			sprintf(st1,"select ip from ipaddress where id=%d",atoi(in1.c_str()));
+			*v = data->select_mysql(st1);
+			if(v->size() == 0)
+			{
+				io->myout("hasn`t device !\n");
+				return false;
+			}
+		}
+		else if( in1 == "q")
+		{
 			return false;
 		}
-	}
-	else if(in1 == "show")
-	{
-		data->show();
-	}
-	else if(atoi(in1.c_str()) != 0)
-	{
-		char st1[100] = {0};
-		sprintf(st1,"select ip from ipaddress where id=%d",atoi(in1.c_str()));
-		*v = data->select_mysql(st1);
-		if(v->size() == 0)
+		else
 		{
-			io->myout("hasn`t device !\n");
+			io->myout("illegal input\n");
 			return false;
 		}
+		return true;
 	}
-	else if( in1 == "q")
-	{
-		return false;
-	}
-	else
-	{
-		io->myout("illegal input\n");
-		return false;
-	}
-	return true;
 }
 
 
@@ -223,6 +228,7 @@ bool stdstep(vector<string>* offline,vector<Address>* online,U_MSG* msgbuff)
 		return false;
 	}
 	std::vector<string> devices;
+	DEBUGW;
 	if( !getdevice(&devices) )
 		return false;
 
@@ -238,6 +244,7 @@ bool stdstep(vector<string>* offline,vector<Address>* online,U_MSG* msgbuff)
 		io->myout("sorry, has`n devices what can be connected! \n");
 		return false;
 	}
+	return true;
 }
 
 
@@ -261,7 +268,9 @@ bool exeshell()
 	string shell = io->myin();
 
 	int con_num = sendmsg(&online,shell.c_str(),shell.size());
-	sprintf(st1,"%d msg has sended",con_num);
+	sprintf(st1,"%d msg has sended\n",con_num);
+
+	io->myout(st1);
 
 	socketclose(&online);
 	return true;
