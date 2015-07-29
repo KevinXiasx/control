@@ -1,4 +1,4 @@
-#include "configx.h"
+/*#include "configx.h"
 #include "pool.h"
 #include "Mysql_class.h"
 #include <vector>
@@ -9,14 +9,17 @@
 
 
 Configx Config;
-//======================================accpet============================
+
+//====================================accpet============================
+
+
 void beatheart(Address* addr)
 {
 	Myio* io = Myio::createio();
 	MysqlClass* data = MysqlClass::createsql();
 	if(data == NULL)
 	{
-		io->myerr("mysql can`t connect ,date save fail");
+		io->err("mysql can`t connect ,date save fail");
 		return;
 	}
 	addr->rinit();
@@ -49,6 +52,9 @@ int mainlist()
 	int newfd = 0;
 	while(1)
 	{
+		
+
+		
 		Address * addrbuf = new Address;
 		newfd = sock.accept_socket(addrbuf);
 		DEBUGI(newfd);
@@ -113,19 +119,19 @@ bool getdevice(vector<string> *v)
 	MysqlClass* data = MysqlClass::createsql();
 	if(data == NULL)
 	{
-		io->myerr("mysql can`t connect ,date select fail");
+		io->err("mysql can`t connect ,date select fail");
 		return false;
 	}
 	while(1)
 	{
-		io->myout("-- all --  choose all device \n-- show -- show all device\n-- ID -- choose one of devices\n-- q -- quit\n");
-		string in1 = io->myin();
+		io->out("-- all --  choose all device \n-- show -- show all device\n-- ID -- choose one of devices\n-- q -- quit\n");
+		string in1 = io->in();
 		if(in1 == "all")
 		{
 			*v = data->select_mysql("select ip from ipaddress where heart='y'");
 			if(v->size() == 0)
 			{
-				io->myout("hasn`t device !\n");
+				io->out("hasn`t device !\n");
 				return false;
 			}
 		}
@@ -141,7 +147,7 @@ bool getdevice(vector<string> *v)
 			*v = data->select_mysql(st1);
 			if(v->size() == 0)
 			{
-				io->myout("hasn`t device !\n");
+				io->out("hasn`t device !\n");
 				return false;
 			}
 		}
@@ -151,7 +157,7 @@ bool getdevice(vector<string> *v)
 		}
 		else
 		{
-			io->myout("illegal input\n");
+			io->out("illegal input\n");
 			return false;
 		}
 		return true;
@@ -224,7 +230,7 @@ bool stdstep(vector<string>* offline,vector<Address>* online,U_MSG* msgbuff)
 	MysqlClass* data = MysqlClass::createsql();
 	if(data == NULL)
 	{
-		io->myerr("mysql can`t connect");
+		io->err("mysql can`t connect");
 		return false;
 	}
 	std::vector<string> devices;
@@ -235,13 +241,13 @@ bool stdstep(vector<string>* offline,vector<Address>* online,U_MSG* msgbuff)
 	int con_num = socketconnect(&devices,online,offline);
 	if(con_num == 0)
 	{
-		io->myout("sorry, has`n devices what can be connected!\n ");
+		io->out("sorry, has`n devices what can be connected!\n ");
 		return false;
 	}
 	con_num = sendmsg(online,msgbuff,sizeof(U_MSG));
 	if(con_num == 0)
 	{
-		io->myout("sorry, has`n devices what can be connected! \n");
+		io->out("sorry, has`n devices what can be connected! \n");
 		return false;
 	}
 	return true;
@@ -263,14 +269,14 @@ bool exeshell()
 
 	char st1[100];
 	sprintf(st1,"%d devices has connect , please input shell :",online.size());
-	io->myout(st1);
+	io->out(st1);
 
-	string shell = io->myin();
+	string shell = io->in();
 
 	int con_num = sendmsg(&online,shell.c_str(),shell.size());
 	sprintf(st1,"%d msg has sended\n",con_num);
 
-	io->myout(st1);
+	io->out(st1);
 
 	socketclose(&online);
 	return true;
@@ -279,31 +285,56 @@ bool exeshell()
 
 //-----------------------------------shell----------------------------------------
 
+//===================================file=========================================
+
+bool filetrans(int fd,char* path)
+{
+	int n;
+	char buf[4096];
+	int filefd = open(path,O_RDONLY);
+	ERR(filefd,-1,"file open fail",false);
+	while( n = read(filefd,buf,4096) > 0 )
+		if (n != write(fd,buf,4096) )
+			perror("write err");
+	if(n < 0)
+		perror();
+}
+
+int tfile()
+{
+
+}
+
+
+
+//-----------------------------------file-----------------------------------------
+
+
 void* communicate(void * argument)
 {
 	Myio* io = Myio::createio();
 	MysqlClass* data = MysqlClass::createsql();
 	if(data == NULL)
 	{
-		io->myerr("mysql can`t connect\n");
+		io->err("mysql can`t connect\n");
 		exit(1);
 	}
 	char st1[100] = {0};
 	std::vector<string> v = data->select_mysql("select id from ipaddress where heart='y'");
 	sprintf(st1,"online devices about %d\n",v.size());
-	io->myout(st1);
+	io->out(st1);
 
 	string she;
 	while(1)
 	{
-		io->myout("-q-  Quit\n");
-		io->myout("-1-  translate files\n");
-		io->myout("-2-  shell \n");
-		io->myout("Your Choose :");
-		she = io->myin();
+		io->out("-q-  Quit\n");
+		io->out("-1-  translate files\n");
+		io->out("-2-  shell \n");
+		io->out("Your Choose :");
+		she = io->in();
 		if(she == "1")
 		{
-
+			tfile();
 		}
 		else if(she == "q")
 		{
@@ -315,7 +346,8 @@ void* communicate(void * argument)
 		}
 		else
 		{
-			io->myout("choose illegal !\n");
+			io->out("choose illegal !\n");
 		}
 	}
 }
+*/

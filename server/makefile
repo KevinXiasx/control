@@ -1,5 +1,5 @@
 cc=g++ -g 
-LIB= -lpthread -lrt -lmysql
+LIB= -lpthread -lrt -lmysql -levent
 ELF=main
 src=$(shell find ./ -name '*.cpp')
 obj=$(src:%.cpp=%.o)

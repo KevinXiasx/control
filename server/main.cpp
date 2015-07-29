@@ -1,32 +1,38 @@
-#include "socket_control.h"
+#include "socketcontrol.h"
 #include "configx.h"
 #include "pthread_class.h"
-#include "Mysql_class.h"
-#include "myio.h"
-#include "pool.h"
+#include "mysqlclass.h"
+#include "ioclass.h"
+#include "globaldate.h"
+#include "worker.h"
 
 
-void exit1();
+void exitcall();
 
 int main(int argc, char const *argv[])
 {
+	GlobalDate* date = GlobalDate::create();
+	if(!date->check())
+		return 0;
+	killer(0,0,NULL);
+	//date->Event.createtimer(KILLTIME,killer);
 
-	atexit(exit1);
-	Pthread_x timerkill;
-	timerkill.run(timer_kill_zombie);
-
+	atexit(exitcall);
+	
 	Pthread_x communi;
 	communi.run(communicate);
 
-	mainlist();
-
-
+	Pthread_x reqworker;
+	reqworker.run(requestworker);
+	
+	networker();
+	
 	return 0;
 }
 
 
-void exit1()
+void exitcall()
 {
-	MysqlClass* data = MysqlClass::createsql();	
-	delete data;
+	GlobalDate* date = GlobalDate::create();	
+	delete date;
 }

@@ -9,7 +9,8 @@
 #include <sys/types.h>
 #include <string.h>
 #include <pthread.h>
-
+#include "encrypt.h"
+#include <vector>
 
 using namespace std;
 
@@ -52,9 +53,13 @@ using namespace std;
 
 #define DEBUGW               \
             do{                 \
-                cout<<"file:"<<__FILE__<<"  line:"<<__LINE__<<endl;  \
-            }while(0);          \
+                printf("file:%s  line:%d\n", __FILE__,__LINE__);\
+            }while(0);  
 
+#define DEBUGM(x)
+            do{                 \
+                printf("%s\n", (x));\
+            }while(0);            
 
 #endif 
 
@@ -63,26 +68,41 @@ using namespace std;
 #ifndef MSG_H_
 #define MSG_H_ 
 
-#define ID_HEART 0
-#define ID_ANSWR 1
-#define ID_SHELL 2
-#define ID_TFILE 3
-#define ID_
+#define T_HEART 0   
+#define T_REGST 1   
+#define T_ANSWR 2
+#define T_SHELL 3
+#define T_TFILE 4
 
 typedef union u_msg{
-    unsigned id;
+    unsigned type;
     struct 
     {
+        unsigned type;
+        unsigned id;
+    }heart_m;
+
+    struct 
+    {
+        unsigned type;
+        unsigned id;
+    }regist_m;
+
+    struct 
+    {
+        unsigned type;
         unsigned id;
         unsigned torf;
         unsigned errlen;
     } answer_m;
 
     struct {
-        unsigned id;
+        unsigned type;
+        unsigned commandlen;
     } shell_m;
 
     struct {
+        unsigned type;
         unsigned id;
         unsigned mode;
         unsigned path;

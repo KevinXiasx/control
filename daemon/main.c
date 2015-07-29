@@ -6,9 +6,10 @@
 
 int main(int argc, char const *argv[])
 {
-	pthread_run(timer_connect_host,NULL);
 
-	const_listen_host(NULL);
+	if(linkbash()==false)
+		return 0;
+	timer_connect_host(NULL);
 
 	//timer_connect_host(NULL);
 	return 0;

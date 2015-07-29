@@ -7,7 +7,6 @@
 #include <assert.h>
 #include <sys/types.h>
 #include <string.h>
-#include "includec.h"
 
 #endif
 
@@ -59,30 +58,43 @@
 #endif 
 
 //-----------------------------------------message define------------------------------------
-
 #ifndef MSG_H_
 #define MSG_H_ 
 
-#define ID_HEART 0
-#define ID_ANSWR 1
-#define ID_SHELL 2
-#define ID_TFILE 3
-#define ID_
+#define T_HEART 0   
+#define T_REGST 1   
+#define T_ANSWR 2
+#define T_SHELL 3
+#define T_TFILE 4
 
 typedef union u_msg{
-    unsigned id;
+    unsigned type;
     struct 
     {
+        unsigned type;
+        unsigned id;
+    }heart_m;
+
+    struct 
+    {
+        unsigned type;
+        unsigned id;
+    }regist_m;
+    struct 
+    {
+        unsigned type;
         unsigned id;
         unsigned torf;
         unsigned errlen;
     } answer_m;
 
     struct {
+        unsigned type;
         unsigned id;
     } shell_m;
 
     struct {
+        unsigned type;
         unsigned id;
         unsigned mode;
         unsigned path;
@@ -92,4 +104,3 @@ typedef union u_msg{
 }U_MSG;
 
 #endif
-

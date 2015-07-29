@@ -40,7 +40,7 @@
 	
 }
 */
-/*int address_init(address_x * addr,const char * ips, int fport)
+int address_init(address_x * addr,const char * ips, int fport)
 {
 	addr->myaddr.sin_family = AF_INET;
 	addr->port = fport;
@@ -49,9 +49,9 @@
 	memcpy(addr->ip,ips,strlen(ips));
 	int res = inet_aton(addr->ip,&(addr->myaddr.sin_addr));
 }
-*/
 
-int address_init(address_x * addr,const char * ips, int fport)
+
+/*int address_init(address_x * addr,const char * ips, int fport)
 {
 	struct addrinfo* lists;
 
@@ -71,7 +71,7 @@ int address_init(address_x * addr,const char * ips, int fport)
 	memcpy(addr->ip,ips,strlen(ips));
 	//int s = inet_aton(addr->ip,&(addr->myaddr.sin_addr));
 }
-
+*/
 
 int create_socket_x()
 {
