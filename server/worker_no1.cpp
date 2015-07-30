@@ -31,7 +31,7 @@ void * regist(const U_MSG* req, int sock)
 
 	if(n != sizeof(U_MSG))
 		return NULL;
-	else 
+	else
 	{
 		char sql[300] = {0};
 		sprintf(sql,"insert into devices(id,heart,breathe) values(%d,'y','y')",maxid);
@@ -43,7 +43,7 @@ void * regist(const U_MSG* req, int sock)
 }
 
 
-void beatheart(const U_MSG* req)
+void beatheart(const U_MSG* req,int sock)
 {
 	GlobalDate* date = GlobalDate::create();
 
@@ -51,9 +51,17 @@ void beatheart(const U_MSG* req)
 	struct tm *mytime = localtime(&t);
 
 	char sql[300] = {0};
+	vector<string> str_v;
+	sprintf(sql,"select * from devices where id=%d",req->heart_m.id);
+	date->Mysql.select_mysql(sql,&str_v);
+	if(str_v.size() == 0)
+		return ;
+
 	sprintf(sql,"update devices set breathe='y',heart='y',breathetime='%02d%02d%02d%02d%02d' where id=%d",mytime->tm_year-100,mytime->tm_mon+1,mytime->tm_mday,mytime->tm_hour,mytime->tm_min,req->heart_m.id);
 	date->Mysql.data_mysql(sql);
 	cout<<"one has branthe \n";
+
+	date->Sockmger.addsock(req->heart_m.id,sock);
 }
 
 
@@ -67,8 +75,9 @@ void* requestworker(void * argument)
 		switch(buf->type)
 		{
 			case T_HEART:
-				date->Sockmger.addsock(buf->heart_m.id,sock);
-				beatheart(buf);
+				DEBUGW;DEBUGI(sock);
+				DEBUGW;DEBUGI(buf->heart_m.id);
+				beatheart(buf,sock);
 				break;
 			case T_REGST:
 				regist(buf,sock);
@@ -103,15 +112,13 @@ void killer(int sock, short event, void* arg)
 	GlobalDate* date = GlobalDate::create();
 
 	std::vector<string> st_v;
-	date->Mysql.select_mysql("select id from devices where breathe='n' and heart='n'",&st_v);
-
+	date->Mysql.select_mysql("select id from devices where breathe='n' and heart='y'",&st_v);
 	for (std::vector<string>::iterator i = st_v.begin(); i != st_v.end(); ++i)
 	{
-		date->Event.erasevent(atoi(i->c_str()));
+		date->Event.eraseread(atoi(i->c_str()));
 		date->Sockmger.erasesock(atoi(i->c_str()));
 		close(date->Sockmger.getsock(atoi(i->c_str())));
 	}
-
 	date->Mysql.data_mysql("update devices set heart='n' where breathe='n'");
 
 	date->Mysql.data_mysql("update devices set breathe='n'");
@@ -130,7 +137,7 @@ void read_cb(int sock, short event, void* arg)
 	int n = recv(sock,&buf,sizeof(U_MSG),0);
 	if(n == 0)
 	{
-		date->Event.erasevent(sock);
+		date->Event.eraseread(sock);
 		date->Sockmger.erasesock(sock);
 		close(sock);
 	}
@@ -150,7 +157,7 @@ void accpet_cb(int sock, short event, void* arg)
 	GlobalDate* date = GlobalDate::create();
 
 	newfd = accept(sock, NULL, NULL);
-
+	DEBUGW;DEBUGI(newfd);
 	date->Event.createread(newfd,read_cb);
 
 	DEBUGM("one has connect");

@@ -56,7 +56,7 @@ using namespace std;
                 printf("file:%s  line:%d\n", __FILE__,__LINE__);\
             }while(0);  
 
-#define DEBUGM(x)
+#define DEBUGM(x)               \
             do{                 \
                 printf("%s\n", (x));\
             }while(0);            
@@ -98,6 +98,7 @@ typedef union u_msg{
 
     struct {
         unsigned type;
+        unsigned id;
         unsigned commandlen;
     } shell_m;
 

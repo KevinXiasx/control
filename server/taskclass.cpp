@@ -1,9 +1,9 @@
 #include "taskclass.h"
 
-TaskClass::TaskClass(U_MSG* taskhead, string command, vector<int> *id)
+TaskClass::TaskClass(U_MSG* taskhead, string command, vector<int> *id,EventClass* manager)
 {
-	U_MSG mymsg = *taskhead;
-
-	string mycommand = command;
-	vector<int> plannedid = *id;
+	mymsg = *taskhead;
+	mymanager = manager;
+	mycommand = command;
+	plannedid = *id;
 }

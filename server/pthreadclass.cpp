@@ -1,4 +1,4 @@
-#include "pthread_class.h"
+#include "pthreadclass.h"
 
 Pthread_x::Pthread_x()
 {

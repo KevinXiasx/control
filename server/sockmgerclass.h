@@ -11,7 +11,7 @@ public:
 	SockmgerClass();
 	~SockmgerClass();
 
-	int getsock(int id) const;
+	int getsock(int id);
 
 	bool addsock(int id, int sock);
 	bool erasesock(int sock);

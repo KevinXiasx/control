@@ -2,6 +2,7 @@
 #define WORKER_H_ 
 #include "socketcontrol.h"
 #include "globaldate.h"
+#include "encrypt.h"
 
 void* requestworker(void * argument);
 

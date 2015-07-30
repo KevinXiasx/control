@@ -1,7 +1,7 @@
 #include "encrypt.h"
 #include <unistd.h>
 
-int sendpt(int fd, void *buf, unsigned size)
+int sendpt(int fd, const void *buf, unsigned size)
 {
 	return write(fd,buf,size);
 }

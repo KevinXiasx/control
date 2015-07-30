@@ -1,6 +1,6 @@
 #include "socketcontrol.h"
 #include "configx.h"
-#include "pthread_class.h"
+#include "pthreadclass.h"
 #include "mysqlclass.h"
 #include "ioclass.h"
 #include "globaldate.h"
@@ -16,17 +16,17 @@ int main(int argc, char const *argv[])
 		return 0;
 	killer(0,0,NULL);
 	//date->Event.createtimer(KILLTIME,killer);
-
 	atexit(exitcall);
 	
 	Pthread_x communi;
 	communi.run(communicate);
-
 	Pthread_x reqworker;
 	reqworker.run(requestworker);
 	
 	networker();
 	
+
+	//communicate(NULL);
 	return 0;
 }
 

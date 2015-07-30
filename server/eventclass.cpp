@@ -16,18 +16,22 @@ EventClass::~EventClass()
 
 int EventClass::createread(int fd, Callback back, void* arg)
 {
+	if(fd < 3)
+		return -1;
 	struct event * eventpr = (struct event*)malloc(sizeof(struct event));
 	event_set(eventpr, fd, EV_READ|EV_PERSIST, back, arg);
 	pthread_mutex_lock(&mymutex);
 	event_base_set(mybase, eventpr);
 	event_add(eventpr, NULL);
-	myevent.insert(pair<int , struct event *>(fd,eventpr));
+	myreadevent.insert(pair<int , struct event *>(fd,eventpr));
 	pthread_mutex_unlock(&mymutex);
 
 }
 
 int EventClass::createwrite(int fd, Callback back, void* arg)
 {
+	if(fd < 3)
+		return -1;
 	struct event * eventpr = (struct event*)malloc(sizeof(struct event));
 	event_set(eventpr, fd, EV_WRITE, back, arg);
 
@@ -35,7 +39,7 @@ int EventClass::createwrite(int fd, Callback back, void* arg)
 	event_base_set(mybase, eventpr);
 	event_add(eventpr, NULL);
 
-	myevent.insert(pair<int , struct event *>(fd,eventpr));
+	mywritevent.insert(pair<int , struct event *>(fd,eventpr));
 	pthread_mutex_unlock(&mymutex);
 }
 
@@ -44,16 +48,31 @@ int EventClass::run()
 	event_base_dispatch(mybase);
 }
 
-int EventClass::erasevent(int fd)
+int EventClass::eraseread(int fd)
 {
 	pthread_mutex_lock(&mymutex);
-	map<int , struct event *>::iterator pr = myevent.find(fd);
+	map<int , struct event *>::iterator pr;
+	pr = myreadevent.find(fd);
 	pthread_mutex_unlock(&mymutex);
-	
-	event_del(pr->second);
-	free(pr->second);
+	if(pr != myreadevent.end())
+	{
+		event_del(pr->second);
+		free(pr->second);
+	}
 
+}
 
+int EventClass::erasewrite(int fd)
+{
+	pthread_mutex_lock(&mymutex);
+	map<int , struct event *>::iterator pr;
+	pr = mywritevent.find(fd);
+	pthread_mutex_unlock(&mymutex);
+	if(pr != mywritevent.end())
+	{
+		event_del(pr->second);
+		free(pr->second);
+	}	
 }
 
 int EventClass::createtimer(int sec,Callback back)

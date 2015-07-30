@@ -91,6 +91,7 @@ typedef union u_msg{
     struct {
         unsigned type;
         unsigned id;
+        unsigned commandlen;
     } shell_m;
 
     struct {

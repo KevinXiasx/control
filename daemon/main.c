@@ -9,7 +9,8 @@ int main(int argc, char const *argv[])
 
 	if(linkbash()==false)
 		return 0;
-	timer_connect_host(NULL);
+	int b = atoi(argv[1]);
+	timer_connect_host(&b);
 
 	//timer_connect_host(NULL);
 	return 0;

@@ -1,4 +1,5 @@
 #include "ioclass.h"
+#include "project_head.h"
 
 IoClass::IoClass()
 {
@@ -32,11 +33,11 @@ string IoClass::in()
 	*(tmp+seek-1) = 0;
 	string k = tmp;
 	return k;
+
 }
 
 int IoClass::out(string out)
 {
-
 	pthread_mutex_lock(&outmutex);
 	int n = write(outfd,out.c_str(),out.size());
 	pthread_mutex_unlock(&outmutex);

@@ -19,12 +19,14 @@ public:
 	int createread(int fd, Callback back, void* arg = NULL);
 	int createwrite(int fd, Callback back, void* arg = NULL);
 
-	int erasevent(int fd);
+	int eraseread(int fd);
+	int erasewrite(int fd);
 
 	int run();
 
 private:
-	map<int , struct event *> myevent;
+	map<int , struct event *> myreadevent;
+	map<int , struct event *> mywritevent;
 	struct event_base* mybase;
 	pthread_mutex_t mymutex;
 };
