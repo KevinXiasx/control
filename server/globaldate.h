@@ -19,7 +19,7 @@ public:
 	bool check();
 
 	IoClass Io;
-	SockmgerClass Sockmger;
+	BdgmgerClass Bdgmger;
 	EventClass Event;
 	Configx Config;
 	RequestClass Request;

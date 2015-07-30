@@ -6,7 +6,7 @@
 
 //===========================requestworker===========================
 
-void * regist(const U_MSG* req, int sock)
+void * regist(const U_MSG* req,Bridge * bdg)
 {
 	GlobalDate* date = GlobalDate::create();
 	int maxid;
@@ -27,7 +27,7 @@ void * regist(const U_MSG* req, int sock)
 	buf.regist_m.type = T_REGST;
 	buf.regist_m.id = maxid;
 
-	int n = sendpt(sock,&buf,sizeof(U_MSG));
+	int n = sendpt(bdg->socket(),&buf,sizeof(U_MSG));
 
 	if(n != sizeof(U_MSG))
 		return NULL;
@@ -36,14 +36,15 @@ void * regist(const U_MSG* req, int sock)
 		char sql[300] = {0};
 		sprintf(sql,"insert into devices(id,heart,breathe) values(%d,'y','y')",maxid);
 		date->Mysql.data_mysql(sql);
-		date->Sockmger.addsock(maxid,sock);
+		bdg->set(maxid);
+		date->Bdgmger->addbdg(bdg);
 		cout<<"one has register \n";
 	}
 	return NULL;
 }
 
 
-void beatheart(const U_MSG* req,int sock)
+void beatheart(const U_MSG* req, Bridge * bdg)
 {
 	GlobalDate* date = GlobalDate::create();
 
@@ -61,7 +62,8 @@ void beatheart(const U_MSG* req,int sock)
 	date->Mysql.data_mysql(sql);
 	cout<<"one has branthe \n";
 
-	date->Sockmger.addsock(req->heart_m.id,sock);
+	bdg->setid(req->heart_m.id);
+	date->Bdgmger->addbdg(bdg);
 }
 
 
@@ -69,18 +71,17 @@ void* requestworker(void * argument)
 {
 	GlobalDate* date = GlobalDate::create();
 	U_MSG * buf = (U_MSG *)malloc(sizeof(U_MSG));
+	Bridge * bdg;
 	while(true)
 	{
 		int sock = date->Request.getrequest(buf);
 		switch(buf->type)
 		{
 			case T_HEART:
-				DEBUGW;DEBUGI(sock);
-				DEBUGW;DEBUGI(buf->heart_m.id);
-				beatheart(buf,sock);
+				beatheart(buf,bdg);
 				break;
 			case T_REGST:
-				regist(buf,sock);
+				regist(buf,bdg);
 			default:
 				break;
 		}
@@ -93,37 +94,21 @@ void* requestworker(void * argument)
 //==================================kill============================
 
 
-/*
-bool killer(string ip)
-{
-	MysqlClass* data = MysqlClass::createsql();
-	if(data == NULL)
-	{
-		return false;
-	}
-	char sql[300] = {0};
-	sprintf(sql,"update ipaddress set heart='n',breathe='n' where ip='%s'",ip.c_str());
-	return data->data_mysql(sql);
-}
-*/
-
 void killer(int sock, short event, void* arg)
 {
 	GlobalDate* date = GlobalDate::create();
-
+	Bridge* bdg = NULL;
 	std::vector<string> st_v;
-	date->Mysql.select_mysql("select id from devices where breathe='n' and heart='y'",&st_v);
-	for (std::vector<string>::iterator i = st_v.begin(); i != st_v.end(); ++i)
-	{
-		date->Event.eraseread(atoi(i->c_str()));
-		date->Sockmger.erasesock(atoi(i->c_str()));
-		close(date->Sockmger.getsock(atoi(i->c_str())));
-	}
-	date->Mysql.data_mysql("update devices set heart='n' where breathe='n'");
+	date->Mysql->select_mysql("select id from devices where breathe='n' and heart='y'",&st_v);
+	for (vector<string>::iterator i = st_v.begin(); i != st_v.end(); ++i)
+		date->Bdgmger->erasebdg(atoi(i->c_str()),KEY_ID);
 
-	date->Mysql.data_mysql("update devices set breathe='n'");
+	date->Mysql->data_mysql("update devices set heart='n' where breathe='n'");
 
-	date->Event.createtimer(KILLTIME,killer);
+	date->Mysql->data_mysql("update devices set breathe='n'");
+
+	free(arg);
+	date->Event->createtimer(KILLTIME,killer);
 }
 
 //----------------------------------kill-------------------------
@@ -133,21 +118,16 @@ void killer(int sock, short event, void* arg)
 void read_cb(int sock, short event, void* arg)
 {
 	GlobalDate* date = GlobalDate::create();
+	Bridge* bdg = date->Bdgmger->getbdg(sock, KEY_SOCK);
+
 	U_MSG buf;
-	int n = recv(sock,&buf,sizeof(U_MSG),0);
+	int n = recvpt(bdg->socket(),&buf,sizeof(U_MSG));
 	if(n == 0)
-	{
-		date->Event.eraseread(sock);
-		date->Sockmger.erasesock(sock);
-		close(sock);
-	}
+		delete bdg;
 	else if(n == -1)
-		date->Io.err("read err");
-	else
-	{
-		DEBUGW;
-		date->Request.insertrequest(&buf,sock);
-	}
+		date->Io->err("read err");
+	else if( n == sizeof(U_MSG) )
+		date->Request->insertrequest(&buf,bdg->socket());
 }
 
 
@@ -157,8 +137,8 @@ void accpet_cb(int sock, short event, void* arg)
 	GlobalDate* date = GlobalDate::create();
 
 	newfd = accept(sock, NULL, NULL);
-	DEBUGW;DEBUGI(newfd);
-	date->Event.createread(newfd,read_cb);
+
+	date->Event->createread(newfd,read_cb);
 
 	DEBUGM("one has connect");
 }
@@ -171,15 +151,16 @@ int networker()
 	Socket sock;
 	if(!sock.create_socket())
 		return 0;
-	if(!sock.bind_socket(date->Config.getconfint("ctosport")))
+	if(!sock.bind_socket(date->Config->getconfint("ctosport")))
 		return 0;
 	if(!sock.listen_socket())
 		return 0;
 	int newfd = 0;
 
-	date->Event.createread(sock.mysocketFd,accpet_cb);
+	Bridge* bdg = new Bridge(sock.mysocketFd);
+	bdg->intoevt(date->Event,accpet_cb,FLAG_READ);
 
-	date->Event.run();
+	date->Event->run();
 }
 
 //---------------------------network---------------------------

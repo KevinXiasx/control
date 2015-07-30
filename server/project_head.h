@@ -16,6 +16,12 @@ using namespace std;
 
 #endif
 
+#define EXIST -1
+#define NOEXIST -2
+#define SUCCESS 0
+#define OTHES -3
+
+
 
 #ifndef ERR_OPERAT_H_
 #define ERR_OPERAT_H_

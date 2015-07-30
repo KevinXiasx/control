@@ -17,7 +17,14 @@ GlobalDate* GlobalDate::create()
 
 GlobalDate::GlobalDate()
 {
-	if( !(mycheck = Mysql.connect_mysql()) )
+	Io = new IoClass;
+	Bdgmger = new BdgmgerClass;
+	Event = new EventClass;
+	Config = new Configx;
+	Request = new RequestClass;
+	Mysql = new MysqlClass;
+	
+	if( !(mycheck = Mysql->connect_mysql()) )
 		Io.out("database err, program can`t work \n");
 }
 
