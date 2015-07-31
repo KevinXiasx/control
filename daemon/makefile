@@ -1,5 +1,5 @@
 cc=gcc -g 
-LIB= -lpthread -lrt -lanl
+LIB= -lpthread -lrt -lanl -levent
 ELF=main
 src=$(shell find ./ -name '*.c')
 obj=$(src:%.c=%.o)

@@ -7,14 +7,15 @@
 
 class EventClass;
 
-#define SOCK int
-#define ID 	 int
-#define Unkown -1
+typedef int SOCK;
+typedef int ID ;
+#define Unknow -1
 
 #define FLAG_READ 1
 #define FLAG_WRITE 2
 #define FLAG_BOTH 3
-
+#define FLAG_DEL 4
+#define FLAG_NODEL 5
 class Bridge
 {
 public:
@@ -49,12 +50,14 @@ public:
 	BdgmgerClass();
 	~BdgmgerClass();
 
-	Bridge* getbdg(int key,int keytype) const;
+	Bridge* getbdg(int key,int keytype) ;
 
 	int addbdg(Bridge* bdg);
-	int erasebdg(int key,int keytype);
+	int erasebdg(int key,int keytype,int flag);
 
-	int size() const;
+	int livebdg(vector<Bridge*> *v);
+
+	int size() ;
 
 private:
 	map<int, Bridge*> id_map;

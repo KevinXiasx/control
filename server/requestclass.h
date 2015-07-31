@@ -3,7 +3,7 @@
 
 #include "project_head.h"
 #include <map>
-
+#include "requestclass.h"
 
 class RequestClass
 {

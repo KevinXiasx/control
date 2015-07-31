@@ -5,23 +5,60 @@
 #include "project_head.h"
 #include <iostream>
 #include "eventclass.h"
+
+
 using namespace std;
+
+class TaskClass;
+class Bridge;
+
+
+class Pak
+{
+public:
+	Pak(void* prt,size_t size,TaskClass* task,Bridge* bdg);
+	~Pak();
+
+	void* prt;
+	size_t size;
+	TaskClass* task;
+	Bridge* bdg;
+};
+
+
+
 
 class TaskClass
 {
 public:
-	TaskClass(U_MSG* taskhead, string command, vector<int> *id,EventClass* manager);
-	
+	TaskClass(int type, string command, vector<Bridge*> *bdg, EventClass* manager);
 	~TaskClass();
 
-	U_MSG mymsg;
+	int setrdbk(Callback rd);
+	int setwrbk(Callback wr);
+
+	int succsbdg(Bridge* bdg);
+	int failbdg(Bridge* bdg);
+
+	int rgstask();
+
+	bool over();
+	int failnum();
+	int succsnum();
+	int ending();
+private:
+	int mytype;
 	string mycommand;
 	EventClass* mymanager;
-	vector<int> plannedid;
-	vector<int> failedid;
-	vector<int> successfulid;
+
+	vector<Bridge*> *mybdg;
+	vector<Bridge*> failedbdg;
+	vector<Bridge*> succsedbdg;
+
+	Callback myrdback;
+	Callback mywrback;
+	Pak* pak;
 };
 
 
 #endif
-

@@ -3,11 +3,9 @@
 
 #include <map>
 #include <event.h>
-
+#include "project_head.h"
 
 using namespace std;
-
-typedef  void (*Callback)(int sock, short event, void* arg);
 
 
 class EventClass
@@ -20,10 +18,14 @@ public:
 	struct event * createread(int fd, Callback back, void* arg = NULL);
 	struct event * createwrite(int fd, Callback back, void* arg = NULL);
 
+	int getrdsize() const;
+	int getwrsize() const;
 	int run();
 
 private:
 	struct event_base* mybase;
+	int rdsize;
+	int wrsize;
 };
 
 #endif

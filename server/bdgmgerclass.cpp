@@ -1,9 +1,10 @@
 #include "bdgmgerclass.h"
-
+#include "eventclass.h"
+#include <unistd.h>
 Bridge::Bridge()
 {
-	mysock = Unkown;
-	myid = Unkown;
+	mysock = Unknow;
+	myid = Unknow;
 	myrdevt = NULL;
 	mywtevt = NULL;
 	mybase = NULL;	
@@ -18,20 +19,20 @@ Bridge::Bridge(SOCK sock, ID id)
 	mybase = NULL;		
 }
 
-Bridge(SOCK sock)
+Bridge::Bridge(SOCK sock)
 {
 	mysock = sock;
-	myid = Unkown;
+	myid = Unknow;
 	myrdevt = NULL;
 	mywtevt = NULL;
 	mybase = NULL;		
 }
 
-Bridge::Bridge(SOCK sock, ID id, EventClass * eventmg, Callback backfun, int flag, void* argument)
+Bridge::Bridge(SOCK sock, EventClass * eventmg, Callback backfun, int flag, void* argument)
 {
 	assert(flag != FLAG_BOTH);
 	mysock = sock;
-	myid = id;
+	myid = Unknow;
 	myrdevt = NULL;
 	mywtevt = NULL;
 	mybase = eventmg;
@@ -53,12 +54,11 @@ SOCK Bridge::socket() const
 
 ID Bridge::id() const
 {
-	assert(myid != Unkown);
 	return myid;
 }
 
 
-ID ridge::setid(ID id)
+ID Bridge::setid(ID id)
 {
 	myid = id;
 	return myid;
@@ -66,42 +66,54 @@ ID ridge::setid(ID id)
 
 int Bridge::intoevt(EventClass * eventmg, Callback backfun, int flag, void* argument)
 {
-	assert(mysock != Unkown);
+	if(mysock == Unknow)
+		return NOEXIST;
 	assert(flag != FLAG_BOTH);
-	mybase = eventmg;
 	if(flag == FLAG_READ)
+	{
+		if(myrdevt != NULL)
+			outevt(FLAG_READ);
 		myrdevt = eventmg->createread(mysock, backfun, argument);
+	}
 	else if(flag == FLAG_WRITE)
+	{
+		if(mywtevt != NULL)
+			outevt(FLAG_WRITE);		
 		mywtevt = eventmg->createwrite(mysock, backfun, argument);
+	}
+	mybase = eventmg;
 }
 
 int Bridge::outevt(int flag)
 {
 	mybase = NULL;
-	if(flag == FLAG_READ)
+	if(flag == FLAG_READ && myrdevt != NULL)
 	{
 		assert(myrdevt != NULL);
 		event_del(myrdevt);
 		free(myrdevt);
-		myrdevt == NULL;
+		myrdevt = NULL;
 	}
-	else if(flag == FLAG_WRITE)
+	else if(flag == FLAG_WRITE && mywtevt != NULL)
 	{
-		assert(mywtevt != NULL);
 		event_del(mywtevt);
 		free(mywtevt);
-		mywtevt == NULL;
+		mywtevt = NULL;
 	}
-	else if( flag == FLAG_BOTH)
+	else if( flag == FLAG_BOTH )
 	{
-		assert(myrdevt != NULL);
-		assert(mywtevt != NULL);
-		event_del(myrdevt);
-		free(myrdevt);
-		event_del(mywtevt);
-		free(mywtevt);
-		mywtevt == NULL;
-		myrdevt == NULL;
+		if(myrdevt != NULL)
+		{
+			event_del(myrdevt);
+			free(myrdevt);
+			myrdevt = NULL;	
+		}
+		if(mywtevt != NULL)
+		{
+			event_del(mywtevt);
+			free(mywtevt);
+			mywtevt = NULL;			
+		}		
 	}
 }
 
@@ -109,7 +121,8 @@ int Bridge::outevt(int flag)
 int Bridge::close()
 {
 	outevt(FLAG_BOTH);
-	close(mysock);
+	::close(mysock);
+	mysock = Unknow;
 }
 
 
@@ -117,7 +130,7 @@ int Bridge::close()
 
 
 
-Bridge* BdgmgerClass::getbdg(int key,int keytype) const
+Bridge* BdgmgerClass::getbdg(int key,int keytype) 
 {
 	map<int, Bridge*>::iterator pr;
 	pthread_rwlock_rdlock(&mylock);
@@ -163,7 +176,7 @@ int BdgmgerClass::addbdg(Bridge* bdg)
 	return SUCCESS;
 }
 
-int BdgmgerClass::erasebdg(int key,int keytype)
+int BdgmgerClass::erasebdg(int key,int keytype,int flag)
 {
 	map<int, Bridge*>::iterator pr;
 	Bridge* bdg;
@@ -180,7 +193,8 @@ int BdgmgerClass::erasebdg(int key,int keytype)
 		sock_map.erase(pr);
 
 		id_map.erase(bdg->id());
-		delete bdg;
+		if(flag==FLAG_DEL)
+			delete bdg;
 	}
 	else if(keytype == KEY_ID)
 	{
@@ -194,14 +208,15 @@ int BdgmgerClass::erasebdg(int key,int keytype)
 		id_map.erase(pr);
 
 		sock_map.erase(bdg->socket());
-		delete bdg;
+		if(flag==FLAG_DEL)
+			delete bdg;
 	}
 	pthread_rwlock_unlock(&mylock);
 	return SUCCESS;
 }
 
 
-int BdgmgerClass::size() const
+int BdgmgerClass::size() 
 {
 	pthread_rwlock_rdlock(&mylock);
 	int s = id_map.size();
@@ -216,4 +231,16 @@ BdgmgerClass::BdgmgerClass()
 BdgmgerClass::~BdgmgerClass()
 {
 	pthread_rwlock_destroy(&mylock);
+}
+
+
+int BdgmgerClass::livebdg(vector<Bridge*> *v)
+{
+	map<int, Bridge*>::iterator pr;
+	for(pr = sock_map.begin(); pr!=sock_map.end(); pr++)
+	{
+		if((pr->second)->socket() != Unknow)
+			v->push_back(pr->second);
+	}
+	return v->size();
 }

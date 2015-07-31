@@ -3,15 +3,21 @@
 #include "pthreadxsx.h"
 #include "contain.h"
 #include <unistd.h>
+#include <event.h>
+
+
+struct event_base* mybase = NULL;
+int extid = 0;
 
 int main(int argc, char const *argv[])
 {
+	extid = atoi(argv[1]);
 
 	if(linkbash()==false)
 		return 0;
-	int b = atoi(argv[1]);
-	timer_connect_host(&b);
 
-	//timer_connect_host(NULL);
+	Timer(1,connect_host,NULL);
+
+	event_base_dispatch(mybase);
 	return 0;
 }

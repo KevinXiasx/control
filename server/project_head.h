@@ -22,6 +22,8 @@ using namespace std;
 #define OTHES -3
 
 
+typedef  void (*Callback)(int sock, short event, void* arg);
+
 
 #ifndef ERR_OPERAT_H_
 #define ERR_OPERAT_H_

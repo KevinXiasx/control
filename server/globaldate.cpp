@@ -25,7 +25,7 @@ GlobalDate::GlobalDate()
 	Mysql = new MysqlClass;
 	
 	if( !(mycheck = Mysql->connect_mysql()) )
-		Io.out("database err, program can`t work \n");
+		Io->out("database err, program can`t work \n");
 }
 
 GlobalDate::~GlobalDate()

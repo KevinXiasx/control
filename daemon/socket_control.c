@@ -129,3 +129,15 @@ int connect_x(int socket,address_x * myAddr)
 	DEBUGW;
 	return socket;
 }
+
+
+int begin(const char* ip, const char* port)
+{
+	address_x addr;
+	address_init(&addr,ip,atoi(port));
+	int sockfd = create_socket_x();
+	if(sockfd == -1)
+		return false;
+	if( connect_x(sockfd,&addr) == -1)
+		return false;
+}

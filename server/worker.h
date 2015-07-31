@@ -3,14 +3,17 @@
 #include "socketcontrol.h"
 #include "globaldate.h"
 #include "encrypt.h"
-
-void* requestworker(void * argument);
-
-int networker();
-
-void* communicate(void * argument);
+#include "bdgmgerclass.h"
 
 #define KILLTIME 3600
+
+int networker();
+void* communicate(void * argument);
+void* shellworker(void * argument);
+
+
+void accpet_cb(int sock, short event, void* arg);
 void killer(int sock, short event, void* arg);
+void read_cb(int sock, short event, void* arg);
 
 #endif

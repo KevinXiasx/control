@@ -20,8 +20,6 @@ int main(int argc, char const *argv[])
 	
 	Pthread_x communi;
 	communi.run(communicate);
-	Pthread_x reqworker;
-	reqworker.run(requestworker);
 	
 	networker();
 	

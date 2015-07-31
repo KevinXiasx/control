@@ -14,7 +14,6 @@ int readcfg(const char* cfg, char*  value)
 	{
 		if(errno == EEXIST)
 		{
-			DEBUGW;
 			int fd2 = open("/etc/con.cfg",O_RDONLY);
 			if(fd2 <= 0)
 				goto label;
@@ -36,7 +35,6 @@ int readcfg(const char* cfg, char*  value)
 		}
 		else
 		{
-			DEBUGW;
 			return false;
 		}
 	}

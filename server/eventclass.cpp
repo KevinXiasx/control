@@ -2,6 +2,7 @@
 #include <pthread.h>
 #include "project_head.h"
 
+
 EventClass::EventClass()
 {
 	mybase = event_base_new();
@@ -13,23 +14,24 @@ EventClass::~EventClass()
 }
 
 
-struct event * EventClass::createread(Bridge* bridge, Callback back, void* arg)
+struct event * EventClass::createread(int fd, Callback back, void* arg)
 {
 	struct event * eventpr = (struct event*)malloc(sizeof(struct event));
 	event_set(eventpr, fd, EV_READ|EV_PERSIST, back, arg);
 	event_base_set(mybase, eventpr);
 	event_add(eventpr, NULL);
+	rdsize++;
 	return eventpr;
 }
 
-struct event * EventClass::createwrite(Bridge* bridge, Callback back, void* arg)
+struct event * EventClass::createwrite(int fd, Callback back, void* arg)
 {
 	struct event * eventpr = (struct event*)malloc(sizeof(struct event));
 	event_set(eventpr, fd, EV_WRITE, back, arg);
 
 	event_base_set(mybase, eventpr);
 	event_add(eventpr, NULL);
-
+	wrsize++;
 	return eventpr;
 }
 
@@ -46,4 +48,14 @@ int EventClass::createtimer(int sec,Callback back)
 	evtimer_set(eventpr, back, eventpr);
 	event_base_set(mybase, eventpr);
     evtimer_add(eventpr, &t);
+}
+
+
+int EventClass::getrdsize() const
+{
+	return rdsize;
+}
+int EventClass::getwrsize() const
+{
+	return wrsize;
 }

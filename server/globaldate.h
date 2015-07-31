@@ -1,7 +1,7 @@
 #ifndef GLOBALDATE_H_
 #define GLOBALDATE_H_ 
 #include "ioclass.h"
-#include "sockmgerclass.h"
+#include "bdgmgerclass.h"
 #include "configx.h"
 #include "eventclass.h"
 #include "requestclass.h"
@@ -18,12 +18,12 @@ public:
 
 	bool check();
 
-	IoClass Io;
-	BdgmgerClass Bdgmger;
-	EventClass Event;
-	Configx Config;
-	RequestClass Request;
-	MysqlClass Mysql;
+	IoClass *Io;
+	BdgmgerClass *Bdgmger;
+	EventClass *Event;
+	Configx *Config;
+	RequestClass *Request;
+	MysqlClass *Mysql;
 
 
 private:
