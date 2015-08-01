@@ -5,8 +5,9 @@
 #include "project_head.h"
 #include <iostream>
 #include "eventclass.h"
-
-
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 using namespace std;
 
 class TaskClass;
@@ -46,6 +47,11 @@ public:
 	int failnum();
 	int succsnum();
 	int ending();
+
+	static bool rsolvepath(const string& command, string& source, string& dst);
+
+	int srcstring(string & src);
+
 private:
 	int mytype;
 	string mycommand;

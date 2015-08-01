@@ -7,7 +7,7 @@ Bridge::Bridge()
 	myid = Unknow;
 	myrdevt = NULL;
 	mywtevt = NULL;
-	mybase = NULL;	
+	mybase = NULL;
 }
 
 Bridge::Bridge(SOCK sock, ID id)
@@ -165,7 +165,7 @@ int BdgmgerClass::addbdg(Bridge* bdg)
 	if( pr != id_map.end() )
 		return EXIST;
 
-	pr = sock_map.find(bdg->id());
+	pr = sock_map.find(bdg->socket());
 	if( pr != sock_map.end() )
 		return OTHES;
 

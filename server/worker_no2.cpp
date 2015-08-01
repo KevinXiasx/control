@@ -1,7 +1,7 @@
 #include "worker.h"
 #include "project_head.h"
 #include "pthreadclass.h"
-
+ #include <sys/sendfile.h>
 
 //========================shell==========================
 
@@ -96,6 +96,7 @@ reportlabel:
 		char result[100] = {0};
 		sprintf(result,"Task has done,%d devices success, %d devices fial and them id save in database",pak->task->succsnum(),pak->task->failnum());
 		date->Io->out(result);
+		delete pak->task;
 		delete pak;
 		pthread_exit(NULL);
 	}
@@ -130,6 +131,7 @@ void reportshell_cb(int sock, short event, void* arg)
 		char result[100] = {0};
 		sprintf(result,"Task has done,%d devices success, %d devices fial and them id save in database",task->succsnum(),task->failnum());
 		date->Io->out(result);
+		delete task;
 		pthread_exit(NULL);
 	}
 }
@@ -158,6 +160,106 @@ void* shellworker(void * argument)
 //--------------------------shell--------------------------
 
 
+//==========================file===========================
+
+
+
+void tfile_cb(int sock, short event, void* arg)
+{
+	GlobalDate* date = GlobalDate::create();
+	TaskClass* task = (TaskClass*)arg;
+	Bridge* bdg = date->Bdgmger->getbdg(sock,KEY_SOCK);
+	U_MSG rep;
+	int n = recvpt(sock,&rep,sizeof(U_MSG));
+	if( n!=sizeof(U_MSG) )
+	{
+		perror("scok:");
+		date->Bdgmger->erasebdg(sock,KEY_SOCK,FLAG_NODEL);
+		bdg->close();
+		task->failbdg(bdg);
+	}
+	else if( rep.type == T_ANSWR)
+	{
+		if(rep.answer_m.torf == 1)
+		{
+			string filepath;
+			task->srcstring(filepath);
+			int fd = open(filepath.c_str(),O_RDONLY);
+			if(fd == -1)
+			{
+				task->failbdg(bdg);
+				goto tfilereportlabel;
+			}
+
+			struct stat statbuf;
+			if(fstat(fd, &statbuf)== -1)
+			{
+				task->failbdg(bdg);
+				goto tfilereportlabel;				
+			}
+
+			int n = sendfile(sock, fd, NULL, statbuf.st_size);
+			DEBUGI(n);
+			if(n == statbuf.st_size)
+				task->succsbdg(bdg);
+			else
+				task->failbdg(bdg);
+		}
+		else
+			task->failbdg(bdg);
+	}
+	bdg->intoevt(date->Event, read_cb, FLAG_READ,bdg);
+tfilereportlabel:
+	if( task->over() )
+	{
+		char result[100] = {0};
+		sprintf(result,"Task has done,%d devices success, %d devices fial and them id save in database",task->succsnum(),task->failnum());
+		date->Io->out(result);
+		delete task;
+		pthread_exit(NULL);
+	}
+}
+
+
+void* tfileworker(void* argument)
+{
+	GlobalDate* date = GlobalDate::create();
+
+	vector<Bridge*> bdg_v;
+	if(!getdevice(&bdg_v))
+		return NULL;
+	while(1)
+	{
+		date->Io->out("please input \"/sourse-path to /dst-path\"\n");
+		string command = date->Io->in();
+		if(command == "q")
+			pthread_exit(NULL);
+		string src,dst;
+		if (!TaskClass::rsolvepath(command,src,dst))
+		{
+			date->Io->out("path err, input again\n");
+			continue;
+		}
+
+		EventClass* repork = new EventClass;
+		TaskClass * shelltask = new TaskClass(T_TFILE, command, &bdg_v,repork);
+		shelltask->setwrbk(sendshell_cb);
+		shelltask->setrdbk(tfile_cb);
+		if(shelltask->rgstask() == -1)
+		{
+			delete repork;
+			delete shelltask;
+		}
+
+		repork->run();
+	}
+
+}
+
+//--------------------------file----------------------------
+
+
+
 //========================communicate==========================
 
 void* communicate(void * argument)
@@ -181,7 +283,9 @@ void* communicate(void * argument)
 		she = date->Io->in();
 		if(she == "1")
 		{
-
+			taskpthread.run(tfileworker);
+			pthread_t pthid = taskpthread.pthreadid();
+			pthread_join(pthid,NULL);
 		}
 		else if(she == "q")
 		{

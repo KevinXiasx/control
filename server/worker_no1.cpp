@@ -87,13 +87,18 @@ void beatheart(const U_MSG* req, Bridge * bdg)
 	sprintf(sql,"update devices set breathe='y',heart='y',breathetime='%02d%02d%02d%02d%02d' where id=%d",mytime->tm_year-100,mytime->tm_mon+1,mytime->tm_mday,mytime->tm_hour,mytime->tm_min,req->heart_m.id);
 	date->Mysql->data_mysql(sql);
 	cout<<"one has branthe \n";
-
+	DEBUGW;
 	if(bdg->id() == Unknow)
 	{
+		DEBUGW;
 		bdg->setid(req->heart_m.id);
 		if(date->Bdgmger->addbdg(bdg) == EXIST)
+		{
+			DEBUGW;
 			delete bdg;
+		}
 	}
+	DEBUGI(date->Bdgmger->size());
 }
 
 

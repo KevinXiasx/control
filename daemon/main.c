@@ -4,7 +4,7 @@
 #include "contain.h"
 #include <unistd.h>
 #include <event.h>
-
+#include "toolsfun.h"
 
 struct event_base* mybase = NULL;
 int extid = 0;

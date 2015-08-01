@@ -1,7 +1,6 @@
 #ifndef CONTAIN_H_
 #define CONTAIN_H_ 
-
-int linkbash();
+#include "toolsfun.h"
 
 void connect_host(int m, short event, void* arg);
 
