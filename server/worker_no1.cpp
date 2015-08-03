@@ -140,6 +140,8 @@ void read_cb(int sock, short event, void* arg)
 			case T_REGST:
 				regist(&buf,bdg);
 			default:
+				if(date->Bdgmger->erasebdg(bdg->socket(),KEY_SOCK,FLAG_DEL) == NOEXIST)
+					delete bdg;	
 				break;
 		}
 	}

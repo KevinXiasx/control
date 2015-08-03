@@ -3,40 +3,6 @@
 
 extern Configx myConfig;//配置类
 
-/*void* depacketsort(void* argument)//在分包池中収捡的线程
-{
-	GlobalDate* globaldate= GlobalDate::create();
-	while(true)
-	{
-		globaldate->taskPart.sortingpacket();
-	}
-}
-
-void* depacketComp(void* argument)//分包任务池线程函数
-{
-	GlobalDate* globaldate= GlobalDate::create();
-	PacketClass k;
-	while(true)
-	{
-		globaldate->taskPart.gettask(&k);//获取任务
-		globaldate->log.addlog(&k,RES);
-		switch( k.getType() )
-		{
-			case PACKET_BREAKHEARD://心跳处理
-				globaldate->myPort.shockheart(&k);
-				cout<<"pthread:"<<(int)pthread_self()<<"get heart "<<endl;
-				globaldate->writeMem.shmwrite(k.getPackPr());
-				break;
-			case PACKET_LOGIN://登录包
-				globaldate->writeMem.shmwrite(k.getPackPr());
-				break;
-			default://不识别的包体
-				break;
-		}
-		k.destroyPacket();
-	}
-}
-*/
 
 void* depacket(void* argument)//单包解包线程执行函数
 {

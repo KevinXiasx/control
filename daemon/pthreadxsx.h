@@ -4,7 +4,6 @@
 #include <pthread.h>
 #include <errno.h>
 #include <stdio.h>
-#include <event.h>
 
 extern struct event_base* mybase;
 
@@ -14,7 +13,7 @@ typedef void (*Callback)(int sock, short sh, void* argument);
 pthread_t pthread_run(pth_fun fun,void *argument);
 
 
-int Timer(int sec, Callback back, void* argument);
+/*int Timer(int sec, Callback back, void* argument);*/
 
 
 #endif

@@ -85,7 +85,7 @@ typedef union u_msg{
         unsigned type;
         unsigned id;
         unsigned torf;
-        unsigned errlen;
+        unsigned loglen;
     } answer_m;
 
     struct {

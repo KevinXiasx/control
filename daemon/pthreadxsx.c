@@ -11,7 +11,7 @@ pthread_t pthread_run(pth_fun fun,void *argument)
 }
 
 
-int Timer(int sec, Callback back, void* argument)
+/*int Timer(int sec, Callback back, void* argument)
 {
 	if( mybase == NULL)
 		mybase = event_base_new();
@@ -20,4 +20,7 @@ int Timer(int sec, Callback back, void* argument)
 	evtimer_set(eventpr, back, eventpr);
 	event_base_set(mybase, eventpr);
     evtimer_add(eventpr, &t);
-}
+
+    sleep(sec);
+    back(sec,0,argument);
+}*/

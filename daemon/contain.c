@@ -1,6 +1,6 @@
 #include "contain.h"
 #include <unistd.h>
-#include "config.h"
+#include "configx.h"
 #include "socket_control.h"
 #include "project_head.h"
 #include "pthreadxsx.h"
@@ -11,11 +11,11 @@ extern int extid;
 
 
 
-void connect_host(int m, short event, void* arg)
+int connect_host(/*int m, short event, void* arg*/)
 {
 	char ipaddr[30];
 	char port[10];
-	free(arg);
+	//free(arg);
 	readcfg("ctosport",port);
 	readcfg("ip",ipaddr);
 	static int sec = 2;
@@ -94,8 +94,8 @@ sleep_label:
 	sec = sec*sec;
 	if(sec > 3600*24)
 		sec = 3600*24;
-	Timer(sec,connect_host,NULL);
+	//Timer(sec,connect_host,NULL);
 	printf("%d\n", sec);
-	return ;
+	return sec;
 }
 

@@ -68,8 +68,9 @@ void sendshell_cb(int sock, short event, void* arg)
 	GlobalDate* date = GlobalDate::create();
 	Pak * pak = (Pak *)arg;
 
-	int n = sendpt(sock,pak->prt,pak->size);
-	if(n != pak->size)
+	int n = sendpt(sock,pak->prt,sizeof(U_MSG));
+	n = sendpt(sock,pak->prt+sizeof(U_MSG),pak->size-sizeof(U_MSG));
+	if(n != pak->size-sizeof(U_MSG))
 	{
 		date->Bdgmger->erasebdg(sock,KEY_SOCK,FLAG_NODEL);
 		pak->bdg->close();
@@ -116,12 +117,17 @@ void reportshell_cb(int sock, short event, void* arg)
 		perror("scok:");
 		date->Bdgmger->erasebdg(sock,KEY_SOCK,FLAG_NODEL);
 		bdg->close();
-		task->succsbdg(bdg);
+		task->failbdg(bdg);
 	}
 	else if( rep.type == T_ANSWR)
 	{
 		if(rep.answer_m.torf == 1)
+		{
+			char buf[4096] = {0};
+			recvpt(sock, buf, rep.answer_m.loglen);
+			printf("%s\n", buf);
 			task->succsbdg(bdg);
+		}
 		else
 			task->failbdg(bdg);
 	}
@@ -197,10 +203,12 @@ void tfile_cb(int sock, short event, void* arg)
 				task->failbdg(bdg);
 				goto tfilereportlabel;				
 			}
-
-			int n = sendfile(sock, fd, NULL, statbuf.st_size);
-			DEBUGI(n);
-			if(n == statbuf.st_size)
+			int n = 0, m = 0;
+			char filebuf[4096]  = {0};
+			while( (n=read(fd, filebuf, 4096)) > 0)
+				if( (m=sendpt(sock, filebuf, n)) <= 0 )
+					break;
+			if(m > 0)
 				task->succsbdg(bdg);
 			else
 				task->failbdg(bdg);
