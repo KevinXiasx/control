@@ -13,7 +13,6 @@ public:
 
 	int insertrequest(const U_MSG *buf, int sock);
 	int getrequest(U_MSG *res);
-	//int getrequest(U_MSG *res,int sec);
 
 private:
 	std::map<int ,U_MSG> myrequest;

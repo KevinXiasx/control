@@ -1,13 +1,13 @@
 #include "aes.h"
 #include "encrypt.h"
 #include <unistd.h>
-
+#include <stdio.h>
 #include <string.h>
 
 
 int sendpt(int fd, const void *buf, unsigned size)
 {
-	int times = size/16;
+/*	int times = size/16;
 	if(size%16 != 0)
 		times += 1;
 
@@ -37,14 +37,16 @@ int sendpt(int fd, const void *buf, unsigned size)
 		if(ret <= 0)
 			return ret;
 	}
-	return size;
+	return size;*/
+
+	return write(fd, buf, size);
 }
 
 
 
 int recvpt(int fd, void *buf,unsigned size)
 {
-	int times = size/16;
+/*	int times = size/16;
 	if(size%16 != 0)
 		times += 1;
 
@@ -72,6 +74,38 @@ int recvpt(int fd, void *buf,unsigned size)
 		else
 			memcpy(buf+16*i, outbuf, 16);
 	}
-	return size;
+	return size;*/
+	return read(fd, buf, size);
 }
 
+int decpipe(int srcfd, int dstfd, unsigned size)
+{
+/*	int times = size/16;
+	if(size%16 != 0)
+		times += 1;
+
+	int rsize = 0, ret = 0;
+
+	unsigned char key[16];
+    unsigned char inbuf[16];
+    unsigned char outbuf[16] ={0};
+
+    aes_context ctx;
+    memset(key, 0, 16);
+ 	memcpy(key, "xsx", 3);
+    aes_setkey_dec(&ctx, key, 128);
+
+	for (int i = 0; i < times; ++i)
+	{
+		ret = read(srcfd, inbuf, 16);
+		if(ret <= 0)
+			return ret;
+
+		aes_crypt_ecb(&ctx, AES_DECRYPT, inbuf, outbuf);
+		if( (i == times-1) && (size%16 != 0) )
+			ret = write(dstfd, outbuf, size%16);
+		else
+			ret = write(dstfd, outbuf, 16);
+	}
+	return size;	*/
+}

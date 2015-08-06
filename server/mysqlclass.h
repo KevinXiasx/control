@@ -22,7 +22,6 @@ public:
 
 	bool select_mysql(string sql,std::vector<string>* v);
 
-	//void show();
 
 private:
 	

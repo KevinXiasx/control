@@ -65,6 +65,7 @@ bool getdevice(vector<Bridge*> *bdg_v)
 
 void sendshell_cb(int sock, short event, void* arg)
 {
+	DEBUGW;
 	GlobalDate* date = GlobalDate::create();
 	Pak * pak = (Pak *)arg;
 
@@ -92,6 +93,7 @@ void sendshell_cb(int sock, short event, void* arg)
 	delete pak;
 	return ;
 reportlabel:
+	DEBUGW;
 	if( pak->task->over() )
 	{
 		char result[100] = {0};
@@ -107,6 +109,7 @@ reportlabel:
 
 void reportshell_cb(int sock, short event, void* arg)
 {
+	DEBUGW;
 	GlobalDate* date = GlobalDate::create();
 	TaskClass* task = (TaskClass*)arg;
 	Bridge* bdg = date->Bdgmger->getbdg(sock,KEY_SOCK);
@@ -123,17 +126,37 @@ void reportshell_cb(int sock, short event, void* arg)
 	{
 		if(rep.answer_m.torf == 1)
 		{
-			char buf[4096] = {0};
-			recvpt(sock, buf, rep.answer_m.loglen);
-			printf("%s\n", buf);
-			task->succsbdg(bdg);
+			char filename[20] = {0};
+			sprintf(filename, "log/log%d", bdg->id());
+
+			int logfilefd = open(filename, O_CREAT|O_APPEND|O_RDWR, 0644);
+/*			if(logfilefd != -1)
+				decpipe(sock, logfilefd, rep.answer_m.loglen);*/
+			char buf[4096];
+			int j, k, i=0;
+			DEBUGM("shell t begin");
+			while( (j=read(sock, buf, 4096)) > 0)
+			{
+				if( (k=write(logfilefd, buf, j)) <= 0)
+					break;
+				if( (i=i+j) == rep.answer_m.loglen)
+					break;
+			}
+			DEBUGM("shell t over");
+			if(k<=0)
+				task->failbdg(bdg);
+			else
+				task->succsbdg(bdg);
+			close(logfilefd);
 		}
 		else
 			task->failbdg(bdg);
 	}
 	bdg->intoevt(date->Event, read_cb, FLAG_READ,bdg);
+	DEBUGW;
 	if(task->over() )
 	{
+		DEBUGW;
 		char result[100] = {0};
 		sprintf(result,"Task has done,%d devices success, %d devices fial and them id save in database",task->succsnum(),task->failnum());
 		date->Io->out(result);
@@ -205,9 +228,14 @@ void tfile_cb(int sock, short event, void* arg)
 			}
 			int n = 0, m = 0;
 			char filebuf[4096]  = {0};
+			DEBUGM("tfile begin");
 			while( (n=read(fd, filebuf, 4096)) > 0)
 				if( (m=sendpt(sock, filebuf, n)) <= 0 )
+				{
+					DEBUGI(m);
 					break;
+				}
+			DEBUGM("tfile over");
 			if(m > 0)
 				task->succsbdg(bdg);
 			else

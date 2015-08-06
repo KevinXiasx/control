@@ -7,7 +7,7 @@
 
 int sendpt(int fd, const void *buf, unsigned size)
 {
-	int times = size/16;
+/*	int times = size/16;
 	if(size%16 != 0)
 		times += 1;
 
@@ -38,14 +38,15 @@ int sendpt(int fd, const void *buf, unsigned size)
 			return ret;
 
 	}
-	return size;
+	return size;*/
+	return write(fd, buf, size);
 }
 
 
 
-int recvpt(int fd, void *buf,unsigned size)
+int recvpt(int fd, void *buf, unsigned size)
 {
-	int times = size/16;
+/*	int times = size/16;
 	if(size%16 != 0)
 		times += 1;
 
@@ -74,6 +75,7 @@ int recvpt(int fd, void *buf,unsigned size)
 		else
 			memcpy(buf+16*i, outbuf, 16);
 	}
-	return size;
+	return size;*/
+	return read(fd, buf, size);
 }
 

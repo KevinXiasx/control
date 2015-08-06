@@ -44,6 +44,7 @@ Bridge::Bridge(SOCK sock, EventClass * eventmg, Callback backfun, int flag, void
 
 Bridge::~Bridge()
 {
+	printf("out one bdg\n");
 	this->close();
 }
 

@@ -15,16 +15,12 @@ int main(int argc, char const *argv[])
 	if(!date->check())
 		return 0;
 	killer(0,0,NULL);
-	//date->Event.createtimer(KILLTIME,killer);
 	atexit(exitcall);
 	
 	Pthread_x communi;
 	communi.run(communicate);
 	
 	networker();
-	
-
-	//communicate(NULL);
 	return 0;
 }
 

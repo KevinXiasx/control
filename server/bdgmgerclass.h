@@ -16,6 +16,7 @@ typedef int ID ;
 #define FLAG_BOTH 3
 #define FLAG_DEL 4
 #define FLAG_NODEL 5
+
 class Bridge
 {
 public:

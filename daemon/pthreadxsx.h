@@ -5,7 +5,6 @@
 #include <errno.h>
 #include <stdio.h>
 
-extern struct event_base* mybase;
 
 typedef void*(*pth_fun)(void*) ;
 typedef void (*Callback)(int sock, short sh, void* argument);

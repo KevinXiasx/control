@@ -16,7 +16,6 @@ MysqlClass::~MysqlClass()
 bool MysqlClass::data_mysql(string sql)
 {
 	bool re = false;
-	cout<<"sql:"<<sql<<endl;
 	pthread_mutex_lock(&sqlmutex);
 	if(mysql_real_query(sqlpr, sql.c_str(),sql.size()+1) != 0)
 	{
@@ -64,7 +63,6 @@ bool MysqlClass::connect_mysql()
 			return false;
 		}
 	}
-	DEBUGW;
 	bool createbool = data_mysql("create table if not exists devices(id int primary key AUTO_INCREMENT,heart char(1) not null,breathe char(1) not null,breathetime char(15))");
 	return createbool;
 
@@ -106,16 +104,3 @@ bool MysqlClass::select_mysql(string sql,vector<string>* v)
 	return true;
 }
 
-
-/*void MysqlClass::show()
-{
-	Myio* io = Myio::createio();
-	char st1[100];
-	std::vector<string> v = select_mysql("select id,ip from ipaddress where heart='y'");
-	for(int i=0;i < v.size(); i=i+2)
-	{
-		sprintf(st1,"%-10s%-20s\n",v[i].c_str(),v[i+1].c_str());
-		io->out(st1);
-	}
-}
-*/

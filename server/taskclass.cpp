@@ -15,8 +15,6 @@ Pak::~Pak()
 
 
 
-
-
 TaskClass::TaskClass(int type, string command, vector<Bridge*> *bdg, EventClass* manager)
 {
 	mytype = type;

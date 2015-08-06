@@ -1,11 +1,11 @@
-cc=gcc -g 
+cc=arm-linux-gnueabihf-gcc -g 
 LIB= -lpthread -lrt -lanl -levent
 ELF=main
 src=$(shell find ./ -name '*.c')
 obj=$(src:%.c=%.o)
 
 $(ELF):$(obj)
-	$(cc) -L/usr/local/lib -o $(ELF) $(^) $(LIB)
+	$(cc)  -static  -L/usr/local/lib -o $(ELF) $(^) $(LIB)
 
 .c.o:
 	$(cc) -c $(<D)/$(<F) -o $(@D)/$(@F) $(LIB)
@@ -15,4 +15,4 @@ clean:
 all:
 	echo $(src)
 
-#          arm-linux-gnueabihf-  -static 
+#           

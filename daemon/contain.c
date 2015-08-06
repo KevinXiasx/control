@@ -79,6 +79,7 @@ beatheart_label:
 	}
 
 waiting_label:
+	sec = 2;
 	if(waiting(sock) == false)
 	{
 		printf("task fail");
@@ -91,7 +92,7 @@ sleep_label:
 		close(false);
 		sock = false;
 	}
-	sec = sec*sec;
+	sec = sec*2;
 	if(sec > 3600*24)
 		sec = 3600*24;
 	//Timer(sec,connect_host,NULL);

@@ -87,23 +87,16 @@ void beatheart(const U_MSG* req, Bridge * bdg)
 	sprintf(sql,"update devices set breathe='y',heart='y',breathetime='%02d%02d%02d%02d%02d' where id=%d",mytime->tm_year-100,mytime->tm_mon+1,mytime->tm_mday,mytime->tm_hour,mytime->tm_min,req->heart_m.id);
 	date->Mysql->data_mysql(sql);
 	cout<<"one has branthe \n";
-	DEBUGW;
 	if(bdg->id() == Unknow)
 	{
-		DEBUGW;
 		bdg->setid(req->heart_m.id);
 		if(date->Bdgmger->addbdg(bdg) == EXIST)
-		{
-			DEBUGW;
 			delete bdg;
-		}
 	}
-	DEBUGI(date->Bdgmger->size());
 }
 
 
 //---------------------------requestworker---------------------------
-
 
 
 //============================network============================
@@ -111,27 +104,21 @@ void read_cb(int sock, short event, void* arg)
 {
 	GlobalDate* date = GlobalDate::create();
 	Bridge* bdg = (Bridge*)arg;
-	DEBUGW;
 	U_MSG buf;
-	printf("%p\n", bdg);
 	int n = recvpt(bdg->socket(),&buf,sizeof(U_MSG));
-	DEBUGI(n);
 	if(n == 0)
 	{
-		DEBUGW;
 		if(date->Bdgmger->erasebdg(bdg->socket(),KEY_SOCK,FLAG_DEL) == NOEXIST)
 			delete bdg;
 	}
 	else if(n != sizeof(U_MSG) )
 	{
-		DEBUGW;
 		perror("read err:");
-		if(date->Bdgmger->erasebdg(bdg->socket(),KEY_SOCK,FLAG_DEL) == NOEXIST)
-			delete bdg;	
+/*		if(date->Bdgmger->erasebdg(bdg->socket(),KEY_SOCK,FLAG_DEL) == NOEXIST)
+			delete bdg;*/
 	}
 	else if( n == sizeof(U_MSG) )
 	{
-		DEBUGW;
 		switch(buf.type)
 		{
 			case T_HEART:
@@ -139,9 +126,8 @@ void read_cb(int sock, short event, void* arg)
 				break;
 			case T_REGST:
 				regist(&buf,bdg);
+				break;
 			default:
-				if(date->Bdgmger->erasebdg(bdg->socket(),KEY_SOCK,FLAG_DEL) == NOEXIST)
-					delete bdg;	
 				break;
 		}
 	}

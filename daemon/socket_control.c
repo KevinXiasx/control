@@ -80,4 +80,5 @@ int begin(const char* ip, const char* port)
 		return false;
 	if( connect_x(sockfd,&addr) == -1)
 		return false;
+	return sockfd;
 }

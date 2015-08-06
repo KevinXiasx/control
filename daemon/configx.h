@@ -5,10 +5,6 @@
 #include "project_head.h"
 
 int readcfg(const char* cfg, char*  value);
-
-int writecfg(const char* cfg, const char * value );
-
-
-
+int wrcfg(const char* cfg, char* value);
 
 #endif

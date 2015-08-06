@@ -6,20 +6,21 @@
 
 #include "toolsfun.h"
 
-struct event_base* mybase = NULL;
 int extid = 0;
 
 int main(int argc, char const *argv[])
 {
-	extid = atoi(argv[1]);
+/*	if( daemon(1, 0) == -1)
+		perror("daemon:");*/
+
+	char idchr[6];
+	if(readcfg("id",idchr) == false)
+		return 0;
+
+	extid = atoi(idchr);
 
 	if(linkbash()==false)
 		return 0;
-
-/*	Timer(1,connect_host,NULL);
-
-	event_base_dispatch(mybase);*/
-
 	while(1)
 	{
 		sleep(connect_host());
