@@ -1,18 +1,19 @@
-cc=gcc -g 
-LIB= -lpthread -lrt -lanl
+cc=arm-linux-gnueabihf-gcc -g
+LIB= -lpthread 
 ELF=main
-src=$(shell find ./ -name '*.c')
+src=$(shell find ./lib/ -name '*.c')
 obj=$(src:%.c=%.o)
 
-$(ELF):$(obj)
-	$(cc) -o $(ELF) $(^) $(LIB)
+linux: $(obj)
+	$(cc) -o $(ELF)-linux-client $(^) $(LIB)
+
+android:  $(obj)
+	$(cc)  -static -o $(ELF)-andorid-client $(^) $(LIB)
 
 .c.o:
 	$(cc) -c $(<D)/$(<F) -o $(@D)/$(@F) $(LIB)
 
 clean:
-	rm -rf $(ELF) $(obj)
+	rm -rf main-* lib/*.o
 all:
 	echo $(src)
-
-#       arm-linux-gnueabihf-  -static 
