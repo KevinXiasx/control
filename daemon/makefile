@@ -1,4 +1,5 @@
-cc=arm-linux-gnueabihf-gcc -g
+#cc=arm-linux-gnueabihf-gcc -g
+cc=gcc -g
 LIB= -lpthread 
 ELF=main
 src=$(shell find ./lib/ -name '*.c')

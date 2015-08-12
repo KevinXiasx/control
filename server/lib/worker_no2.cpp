@@ -67,18 +67,14 @@ void sendshell_cb(int sock, short event, void* arg)
 {
 	GlobalDate* date = GlobalDate::create();
 	Pak * pak = (Pak *)arg;
-	DEBUGW;
 	int n = sendpt(sock,pak->prt,sizeof(U_MSG));
 	n = sendpt(sock,pak->prt+sizeof(U_MSG),pak->size-sizeof(U_MSG));
-	DEBUGW;
 	if(n != pak->size-sizeof(U_MSG))
 	{
-		DEBUGW;
 		date->Bdgmger->erasebdg(sock,KEY_SOCK,FLAG_NODEL);
 		pak->bdg->close();
 		if(n < 0 )
 		{
-			DEBUGW;
 			pak->task->failbdg(pak->bdg);
 			perror("send head:");
 			date->Io->err("data send fail\n");
@@ -86,7 +82,6 @@ void sendshell_cb(int sock, short event, void* arg)
 		}
 		else
 		{
-			DEBUGW;
 			pak->task->failbdg(pak->bdg);
 			date->Io->err("date send imperfect\n");			
 			goto reportlabel;
@@ -94,13 +89,10 @@ void sendshell_cb(int sock, short event, void* arg)
 	}
 	pak->bdg->outevt(FLAG_WRITE);
 	delete pak;
-	DEBUGW;
 	return ;
 reportlabel:
-	DEBUGW;
 	if( pak->task->over() )
 	{
-		DEBUGW;
 		char result[100] = {0};
 		sprintf(result,"Task has done,%d devices success, %d devices fial and them id save in database",pak->task->succsnum(),pak->task->failnum());
 		date->Io->out(result);
@@ -111,7 +103,6 @@ reportlabel:
 	}
 	else
 	{
-		DEBUGW;
 		delete pak;
 	}
 }
@@ -122,9 +113,7 @@ void reportshell_cb(int sock, short event, void* arg)
 	TaskClass* task = (TaskClass*)arg;
 	Bridge* bdg = date->Bdgmger->getbdg(sock,KEY_SOCK);
 	U_MSG rep;
-	DEBUGW;
 	int n = recvpt(sock,&rep,sizeof(U_MSG));
-	DEBUGW;
 	if( n!=sizeof(U_MSG) )
 	{
 		perror("scok:");
@@ -150,8 +139,7 @@ void reportshell_cb(int sock, short event, void* arg)
 			int result = setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout.tv_sec, len);
 
 			char buf[4096];
-			int j, k, i=0;
-			DEBUGM("shell t begin");
+			int j=0, k=0, i=0;
 			while( (j=read(sock, buf, 4096)) > 0)
 			{
 				if( (k=write(logfilefd, buf, j)) <= 0)
@@ -159,31 +147,22 @@ void reportshell_cb(int sock, short event, void* arg)
 				if( (i=i+j) == rep.answer_m.loglen)
 					break;
 			}
-			DEBUGM("shell t over");
 			if(k<0 || j<=0)
 			{
-				DEBUGW;
+				perror("sleep");
 				date->Bdgmger->erasebdg(sock,KEY_SOCK,FLAG_NODEL);
 				task->failbdg(bdg);
 				bdg->close();
 			}
-			else{
-				DEBUGW;
+			else
 				task->succsbdg(bdg);
-			}
 			close(logfilefd);
 		}
-		else{
-			DEBUGW;
-			task->failbdg(bdg);
-		}
-	}
-	DEBUGW;
-	DEBUGI(bdg->intoevt(date->Event, read_cb, FLAG_READ,bdg));
-	DEBUGW;
+		else
+			task->failbdg(bdg);	}
+	bdg->intoevt(date->Event, read_cb, FLAG_READ,bdg);
 	if(task->over() )
 	{
-		DEBUGW;
 		char result[100] = {0};
 		sprintf(result,"Task has done,%d devices success, %d devices fial and them id save in database",task->succsnum(),task->failnum());
 		date->Io->out(result);
@@ -264,14 +243,11 @@ void tfile_cb(int sock, short event, void* arg)
 			socklen_t len = sizeof(timeout);
 			setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, (char*)&timeout.tv_sec, len);
 
-			DEBUGM("tfile begin");
 			while( (n=read(fd, filebuf, 4096)) > 0)
 				if( (m=sendpt(sock, filebuf, n)) <= 0 )
 				{
-					DEBUGI(m);
 					break;
 				}
-			DEBUGM("tfile over");
 			if(m > 0)
 				task->succsbdg(bdg);
 			else{
@@ -283,7 +259,7 @@ void tfile_cb(int sock, short event, void* arg)
 		else
 			task->failbdg(bdg);
 	}
-	DEBUGI(bdg->intoevt(date->Event, read_cb, FLAG_READ,bdg));
+	bdg->intoevt(date->Event, read_cb, FLAG_READ,bdg);
 tfilereportlabel:
 	if( task->over() )
 	{

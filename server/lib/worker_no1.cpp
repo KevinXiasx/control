@@ -106,7 +106,6 @@ void read_cb(int sock, short event, void* arg)
 	Bridge* bdg = (Bridge*)arg;
 	U_MSG buf;
 	int n = recvpt(bdg->socket(),&buf,sizeof(U_MSG));
-	DEBUGM("new msg");DEBUGI(n);
 	if(n <= 0)
 	{
 		if(date->Bdgmger->erasebdg(bdg->socket(),KEY_SOCK,FLAG_DEL) == NOEXIST)
@@ -137,8 +136,6 @@ void accpet_cb(int sock, short event, void* arg)
 
 	Bridge* bdg = new Bridge(newfd);
 	bdg->intoevt(date->Event,read_cb,FLAG_READ,bdg);
-	
-	DEBUGM("one has connect");
 }
 
 
