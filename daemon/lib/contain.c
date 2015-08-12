@@ -92,7 +92,7 @@ sleep_label:
 		close(false);
 		sock = false;
 	}
-	sec = sec*2;
+	sec = 2;
 	if(sec > 3600*24)
 		sec = 3600*24;
 	//Timer(sec,connect_host,NULL);
