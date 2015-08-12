@@ -230,6 +230,8 @@ int dnsbyping(char* ip)
 	//sleep(2);
 	//pthread_cancel(pid);
 	//pthread_join(pid,NULL);
+
+
 	popen(ping, "r");
 	int filefd = open(filename,O_RDWR);
 	if(filefd == -1)
