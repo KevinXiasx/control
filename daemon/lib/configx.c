@@ -41,7 +41,6 @@ int readcfg(const char* cfg, char*  value)
 			return false;
 	}
 	close(fd);
-	DEBUGW;
 	wrcfg("all", NULL);
 label:
 	for( ; n<CFGNUM; n++)
