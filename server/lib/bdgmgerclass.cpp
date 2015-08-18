@@ -125,6 +125,7 @@ int Bridge::close()
 	outevt(FLAG_BOTH);
 	::close(mysock);
 	mysock = Unknow;
+	cout<<"close one sock"<<endl;
 }
 
 

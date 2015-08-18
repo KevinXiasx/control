@@ -22,6 +22,8 @@ using namespace std;
 #define OTHES -3
 
 
+#define ENDINT 0x11221122
+
 typedef  void (*Callback)(int sock, short event, void* arg);
 
 

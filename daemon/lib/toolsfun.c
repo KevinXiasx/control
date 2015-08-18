@@ -52,6 +52,25 @@ int report(int ans,int sock, int loglen)
 	}
 }
 
+int sendend(int sock)
+{
+	int ENDINT =  0x11221122;
+	int n = sendpt(sock,&ENDINT,sizeof(int));
+	if(n!=sizeof(int))
+	{
+		perror("write err");
+		return false;
+	}	
+}
+
+void* shellsystem(void* argument)
+{
+	char* shell =(char*)argument;
+	system(shell);
+	*shell = '\0';
+}
+
+
 int xsystem(char* shellbuf, int sock)
 {
 	int pipefd[2], loop, loop2, size= 0, si= 0;
@@ -61,43 +80,40 @@ int xsystem(char* shellbuf, int sock)
 	pipe(pipefd);
 	int fd = dup2(pipefd[1], STDOUT_FILENO);
 	fd = dup2(pipefd[1], STDERR_FILENO);
-	system(shellbuf);
-/*	char buf[4096];
-	int m, n;
-	while((m = read(pipefd[0], buf, 4096)) > 0)
-		if( (n = write(sock, buf, m)) < 0)
-			break;
-*/
-	char* buf[20] = {0};
-	for(loop = 0; loop<20; loop++)
+
+	int flags = fcntl(pipefd[0], F_GETFL, 0);
+	fcntl(pipefd[0], F_SETFL, flags|O_NONBLOCK);
+
+	pthread_t pid = pthread_run(shellsystem, shellbuf);
+
+	char buf[4096] = {0};
+	while( 1 )
 	{
-		buf[loop] = (char*)malloc(4096);
-		si = read(pipefd[0], buf[loop], 4096);
-		write(2, &si, 4);
-		write(2, buf[loop], si);
-		size+=si;
-		if(si!=4096)
+		si = read(pipefd[0], buf, 4096);
+		if(si == -1)
 		{
-			loop++;
+			if( errno == EWOULDBLOCK)
+			{
+				if( *shellbuf == '\0' )
+					break;
+				else
+					continue;
+			}
+			else
+				break;
+		}
+		else if(si == 0)
+		{
 			break;
 		}
+		size+=si;
+		sendpt(sock, buf, si);
 	}
 	dup2(fdback[0], STDOUT_FILENO);
 	dup2(fdback[1], STDERR_FILENO);
 
-	int ans = report(1,sock,size);
-	if(ans == false)
-		return false;
-	for(loop2 = 0; loop2<loop; loop2++)
-	{
-		if(loop2 == loop-1)
-			sendpt(sock, buf[loop2], si);
-		else
-			sendpt(sock, buf[loop2], 4096);
-		free(buf[loop2]);
-	}
-
-	
+	sendend(sock);
+	return true;	
 }
 
 int waiting(int sock)
@@ -168,39 +184,7 @@ int waiting(int sock)
 					if( (m=m+o) == k.tfile_m.size )
 						break;
 				}
-/*				
-				int ret;
-				if(k.tfile_m.size > 4096)
-				{
-					int times = k.tfile_m.size / 4096;
-					if(k.tfile_m.size%4096 != 0)
-						times += 1;
-					int i = 0;
-					DEBUGW;
-					for (; i < times; ++i)
-					{
-						if( (i == times-1) && ( k.tfile_m.size%4096 != 0) )
-							ret = recvpt(sock, buffile, k.tfile_m.size%4096);
-						else
-							ret = recvpt(sock, buffile, 4096);
-						if(ret < 0)
-						{
-							DEBUGW;
-							break;
-						}
-						write(fd, buffile, ret);
-					}
-					DEBUGW;
-				}
-				else
-				{
-					DEBUGW;
-					ret = recvpt(sock, buffile, k.tfile_m.size);
-					if(ret <= 0)
-						break;
-					write(fd, buffile, ret);
-				}
-				DEBUGW;*/
+
 				close(fd);
 			}
 			default:

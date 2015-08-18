@@ -1,5 +1,6 @@
 #include "../include/taskclass.h"
 #include "../include/bdgmgerclass.h"
+#include "../include/worker.h"
 
 Pak::Pak(void* prt,size_t size, TaskClass* task,Bridge* bdg)
 {
@@ -124,13 +125,15 @@ int TaskClass::succsnum()
 	return succsedbdg.size();
 }
 
-int TaskClass::ending()
+int TaskClass::ending(EventClass * evt)
 {
 	vector<Bridge*>::iterator pr;
 	for(pr = mybdg->begin(); pr!=mybdg->end(); pr++)
 	{
 		if((*pr)->socket() == Unknow)
 			delete *pr;
+		else
+			(*pr)->intoevt(evt, read_cb, FLAG_READ, (*pr));
 	}
 }
 
@@ -166,3 +169,4 @@ bool TaskClass::rsolvepath(const string& command, string& source, string& dst)
 	close(tmpfd);
 	return true;
 }
+

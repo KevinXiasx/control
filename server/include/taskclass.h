@@ -46,7 +46,7 @@ public:
 	bool over();
 	int failnum();
 	int succsnum();
-	int ending();
+	int ending(EventClass *);
 
 	static bool rsolvepath(const string& command, string& source, string& dst);
 
