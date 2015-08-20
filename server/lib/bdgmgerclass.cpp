@@ -88,19 +88,22 @@ int Bridge::intoevt(EventClass * eventmg, Callback backfun, int flag, void* argu
 
 int Bridge::outevt(int flag)
 {
-	mybase = NULL;
 	if(flag == FLAG_READ && myrdevt != NULL)
 	{
 		assert(myrdevt != NULL);
 		event_del(myrdevt);
 		free(myrdevt);
 		myrdevt = NULL;
+		if(mybase != NULL)
+			mybase->deletevt(READEVT);
 	}
 	else if(flag == FLAG_WRITE && mywtevt != NULL)
 	{
 		event_del(mywtevt);
 		free(mywtevt);
 		mywtevt = NULL;
+		if(mybase != NULL)
+			mybase->deletevt(WRITEVT);
 	}
 	else if( flag == FLAG_BOTH )
 	{
@@ -109,14 +112,19 @@ int Bridge::outevt(int flag)
 			event_del(myrdevt);
 			free(myrdevt);
 			myrdevt = NULL;	
+			if(mybase != NULL)
+				mybase->deletevt(READEVT);
 		}
 		if(mywtevt != NULL)
 		{
 			event_del(mywtevt);
 			free(mywtevt);
-			mywtevt = NULL;			
+			mywtevt = NULL;	
+			if(mybase != NULL)
+				mybase->deletevt(WRITEVT);		
 		}		
 	}
+	mybase = NULL;
 }
 
 

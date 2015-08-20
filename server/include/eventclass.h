@@ -7,6 +7,8 @@
 
 using namespace std;
 
+#define WRITEVT 1
+#define READEVT 2
 
 class EventClass
 {
@@ -17,6 +19,8 @@ public:
 
 	struct event * createread(int fd, Callback back, void* arg = NULL);
 	struct event * createwrite(int fd, Callback back, void* arg = NULL);
+
+	int deletevt(int );
 
 	int getrdsize() const;
 	int getwrsize() const;

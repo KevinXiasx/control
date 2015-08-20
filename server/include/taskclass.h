@@ -51,12 +51,13 @@ public:
 	static bool rsolvepath(const string& command, string& source, string& dst);
 
 	int srcstring(string & src);
-
+	
+	EventClass* myManager(){return mymanager;}
+	vector<Bridge*>* myDbg(){return mybdg;}
 private:
 	int mytype;
 	string mycommand;
 	EventClass* mymanager;
-
 	vector<Bridge*> *mybdg;
 	vector<Bridge*> failedbdg;
 	vector<Bridge*> succsedbdg;

@@ -6,6 +6,32 @@
 //========================shell==========================
 
 
+void tasktimeout(int sock, short event, void* arg)
+{
+	static int wrisize = 0;
+	GlobalDate* date = GlobalDate::create();
+	TaskClass* task = (TaskClass*)arg;
+	if( task->myManager()->getwrsize() == wrisize)
+	{
+		for (int i = 0; i < task->myDbg()->size(); ++i)
+		{
+			Bridge* bdg = (*(task->myDbg()))[i] ;
+			if( bdg->myWrite() == NULL )
+			{
+				date->Bdgmger->erasebdg(bdg->socket(),KEY_SOCK,FLAG_NODEL);
+				bdg->close();
+				task->failbdg(bdg);
+				bdg->outevt(FLAG_WRITE);
+			}
+		}
+	}
+	wrisize = task->myManager()->getwrsize();
+
+	task->myManager()->createtimer(5, tasktimeout);
+}
+
+
+
 int selectnumb(vector<int>* dst,const string& src)
 {
 	string nextstring = src;
@@ -207,7 +233,6 @@ void reportshell_cb(int sock, short event, void* arg)
 		close(logfilefd);
 		if(end)
 			task->succsbdg(bdg);
-		
 	}
 
 	if(task->over() )
@@ -240,9 +265,11 @@ void* shellworker(void * argument)
 
 	EventClass* repork = new EventClass;
 	TaskClass * shelltask = new TaskClass(T_SHELL, command, &bdg_v,repork);
+	
 	shelltask->setwrbk(sendshell_cb);
 	shelltask->setrdbk(reportshell_cb);
 	shelltask->rgstask();
+	tasktimeout(0, 0, shelltask);
 	repork->run();
 }
 
@@ -353,6 +380,7 @@ void* tfileworker(void* argument)
 
 		EventClass* repork = new EventClass;
 		TaskClass * shelltask = new TaskClass(T_TFILE, command, &bdg_v,repork);
+		
 		shelltask->setwrbk(sendshell_cb);
 		shelltask->setrdbk(tfile_cb);
 		if(shelltask->rgstask() == -1)
@@ -360,7 +388,7 @@ void* tfileworker(void* argument)
 			delete repork;
 			delete shelltask;
 		}
-
+		tasktimeout(0, 0, shelltask);
 		repork->run();
 	}
 

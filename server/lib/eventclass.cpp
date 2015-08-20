@@ -6,6 +6,8 @@
 EventClass::EventClass()
 {
 	mybase = event_base_new();
+	rdsize = 0;
+	wrsize = 0;
 }
 
 EventClass::~EventClass()
@@ -58,4 +60,13 @@ int EventClass::getrdsize() const
 int EventClass::getwrsize() const
 {
 	return wrsize;
+}
+
+
+int EventClass::deletevt(int b )
+{
+	if( b == WRITEVT )
+		wrsize--;
+	if( b == READEVT)
+		rdsize--;
 }

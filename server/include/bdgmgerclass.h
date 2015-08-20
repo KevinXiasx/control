@@ -33,6 +33,7 @@ public:
 	int outevt(int flag);
 	int close();
 
+	struct event * myWrite(){return mywtevt;}
 private:
 	SOCK mysock;
 	ID myid;
