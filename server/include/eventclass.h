@@ -15,7 +15,7 @@ class EventClass
 public:
 	EventClass();
 	~EventClass();
-	int createtimer(int sec,Callback back);
+	int createtimer(int sec,Callback back, void* arg = NULL);
 
 	struct event * createread(int fd, Callback back, void* arg = NULL);
 	struct event * createwrite(int fd, Callback back, void* arg = NULL);

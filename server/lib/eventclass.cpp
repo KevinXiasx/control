@@ -43,11 +43,14 @@ int EventClass::run()
 }
 
 
-int EventClass::createtimer(int sec,Callback back)
+int EventClass::createtimer(int sec, Callback back, void* arg)
 {
 	struct timeval t = {.tv_sec = sec, .tv_usec = 0 };
 	struct event * eventpr = (struct event*)malloc(sizeof(struct event));
-	evtimer_set(eventpr, back, eventpr);
+	if( arg == NULL)
+		evtimer_set(eventpr, back, eventpr);
+	else
+		evtimer_set(eventpr, back, arg);
 	event_base_set(mybase, eventpr);
     evtimer_add(eventpr, &t);
 }

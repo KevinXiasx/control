@@ -1,4 +1,5 @@
 cc=g++ -g 
+#cc=arm-linux-gnueabihf-gcc -g
 LIB= -lpthread -lrt -lmysql -levent 
 ELF=control-server
 src=$(shell find ./lib/ -name '*.cpp')

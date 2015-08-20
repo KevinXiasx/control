@@ -8,16 +8,20 @@
 
 void tasktimeout(int sock, short event, void* arg)
 {
+	DEBUGW;
 	static int wrisize = 0;
 	GlobalDate* date = GlobalDate::create();
 	TaskClass* task = (TaskClass*)arg;
 	if( task->myManager()->getwrsize() == wrisize)
 	{
+		DEBUGW;
 		for (int i = 0; i < task->myDbg()->size(); ++i)
 		{
+			DEBUGW;
 			Bridge* bdg = (*(task->myDbg()))[i] ;
 			if( bdg->myWrite() == NULL )
 			{
+				DEBUGW;
 				date->Bdgmger->erasebdg(bdg->socket(),KEY_SOCK,FLAG_NODEL);
 				bdg->close();
 				task->failbdg(bdg);
@@ -26,8 +30,9 @@ void tasktimeout(int sock, short event, void* arg)
 		}
 	}
 	wrisize = task->myManager()->getwrsize();
-
-	task->myManager()->createtimer(5, tasktimeout);
+	if( wrisize == 0)
+		return ;
+	task->myManager()->createtimer(5, tasktimeout, task);
 }
 
 
