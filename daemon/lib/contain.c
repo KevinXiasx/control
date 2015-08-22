@@ -30,6 +30,7 @@ DNS_label:
 		printf("dns fail");
 		goto sleep_label;
 	}
+	DEBUGS(ipaddr);
 
 socket_label:
 	if(	(sock = begin(ipaddr,port)) == false )

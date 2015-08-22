@@ -54,6 +54,8 @@ public:
 	
 	EventClass* myManager(){return mymanager;}
 	vector<Bridge*>* myDbg(){return mybdg;}
+
+	int write_totle;
 private:
 	int mytype;
 	string mycommand;

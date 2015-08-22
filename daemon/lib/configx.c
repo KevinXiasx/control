@@ -2,18 +2,20 @@
 #include <string.h>
 
 #define CFGNUM  4
+
+char * filepath = "/data/kevin/con.cfg"; 
 static char * cfgname[CFGNUM] = {"ip","stocport","ctosport","id"};
-static char * cfgvalue[CFGNUM] = {"sz.radxa.info","1912","1122","0"};
+static char * cfgvalue[CFGNUM] = {"12.168.1.108","1912","9111","0"};
 
 int readcfg(const char* cfg, char*  value)
 {
 	int n = 0 ;
-	int fd = open("/etc/con.cfg",O_RDWR|O_CREAT|O_EXCL,0644);
+	int fd = open(filepath,O_RDWR|O_CREAT|O_EXCL,0644);
 	if(fd == -1)
 	{
 		if(errno == EEXIST)
 		{
-			int fd2 = open("/etc/con.cfg",O_RDONLY);
+			int fd2 = open(filepath,O_RDONLY);
 			if(fd2 < 0){
 				perror("open err");
 				wrcfg("all", NULL);
@@ -59,7 +61,7 @@ int wrcfg(const char* cfg, char* value)
 	if( strcmp(cfg, "all") == 0)
 	{
 		int loop, fd;
-		if((fd = open("/etc/con.cfg", O_RDWR|O_CREAT|O_TRUNC, 0644)) == -1)
+		if((fd = open(filepath, O_RDWR|O_CREAT|O_TRUNC, 0644)) == -1)
 			return false;
 
 		for(loop=0; loop<CFGNUM; loop++){
@@ -72,7 +74,7 @@ int wrcfg(const char* cfg, char* value)
 	{
 		int loop1, loop2, fd, ret;
 		char *dstpr, *oldpr;
-		if((fd = open("/etc/con.cfg",O_RDWR)) == -1)
+		if((fd = open(filepath,O_RDWR)) == -1)
 			return false;
 
 		char buff[1024] = {0};
@@ -80,7 +82,7 @@ int wrcfg(const char* cfg, char* value)
 			return false;
 
 		close(fd);
-		if( (fd = open("/etc/con.cfg", O_RDWR|O_CREAT|O_TRUNC, 0644)) == 0)
+		if( (fd = open(filepath, O_RDWR|O_CREAT|O_TRUNC, 0644)) == 0)
 			return false;
 
 		if( (dstpr = strstr(buff, cfg)) == NULL)

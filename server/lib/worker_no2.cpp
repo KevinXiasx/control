@@ -9,17 +9,18 @@
 void tasktimeout(int sock, short event, void* arg)
 {
 	DEBUGW;
-	static int wrisize = 0;
 	GlobalDate* date = GlobalDate::create();
 	TaskClass* task = (TaskClass*)arg;
-	if( task->myManager()->getwrsize() == wrisize)
+	DEBUGI(task->write_totle);
+	DEBUGI(task->myManager()->getwrsize());
+	if( task->myManager()->getwrsize() == task->write_totle)
 	{
 		DEBUGW;
 		for (int i = 0; i < task->myDbg()->size(); ++i)
 		{
 			DEBUGW;
 			Bridge* bdg = (*(task->myDbg()))[i] ;
-			if( bdg->myWrite() == NULL )
+			if( bdg->myWrite() != NULL )
 			{
 				DEBUGW;
 				date->Bdgmger->erasebdg(bdg->socket(),KEY_SOCK,FLAG_NODEL);
@@ -29,8 +30,8 @@ void tasktimeout(int sock, short event, void* arg)
 			}
 		}
 	}
-	wrisize = task->myManager()->getwrsize();
-	if( wrisize == 0)
+	task->write_totle = task->myManager()->getwrsize();
+	if( task->write_totle == 0)
 		return ;
 	task->myManager()->createtimer(5, tasktimeout, task);
 }
@@ -59,7 +60,6 @@ int selectnumb(vector<int>* dst,const string& src)
 			if(newid != 0)
 				dst->push_back(newid);
 		}
-
 		if(index == string::npos)
 			break;
 		else
@@ -71,7 +71,6 @@ int selectnumb(vector<int>* dst,const string& src)
 bool getdevice(vector<Bridge*> *bdg_v)
 {
 	GlobalDate* date = GlobalDate::create();
-	
 	while(1)
 	{
 		date->Io->out("-- all --  choose all device \n-- show -- show all device\n-- ID -- choose one of devices\n-- q -- quit\n");
@@ -156,6 +155,7 @@ bool getdevice(vector<Bridge*> *bdg_v)
 
 void sendshell_cb(int sock, short event, void* arg)
 {
+	DEBUGW;
 	GlobalDate* date = GlobalDate::create();
 	Pak * pak = (Pak *)arg;
 	int n = sendpt(sock,pak->prt,sizeof(U_MSG));
@@ -178,6 +178,7 @@ void sendshell_cb(int sock, short event, void* arg)
 			goto reportlabel;
 		}
 	}
+	DEBUGW;
 	pak->bdg->outevt(FLAG_WRITE);
 	delete pak;
 	return ;

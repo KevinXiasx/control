@@ -25,6 +25,7 @@ TaskClass::TaskClass(int type, string command, vector<Bridge*> *bdg, EventClass*
 	pak = NULL;
 	myrdback = NULL;
 	mywrback = NULL;
+	write_totle = 0;
 }
 
 TaskClass::~TaskClass()

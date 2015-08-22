@@ -15,18 +15,23 @@ int main(int argc, char const *argv[])
 	if(argc == 2)
 	{
 		extid = atoi(argv[1]);
+		DEBUGW;
 	}
 	else if(argc == 1)
 	{	
 		char idchr[6];
 		if(readcfg("id",idchr) == false)
+		{
+			DEBUGW;
 			return 0;
-
+		}
+		DEBUGW;
 		extid = atoi(idchr);
 	}
-	if(linkbash()==false)
-		return 0;
+/*	if(linkbash()==false)
+		return 0;*/
 	while(1)
 		sleep(connect_host());
+	DEBUGW;
 	return 0;
 }

@@ -1,5 +1,5 @@
-#cc=arm-linux-gnueabihf-gcc -g
-cc=gcc -g
+cc=arm-linux-gnueabihf-gcc -g
+#cc=gcc -g
 LIB= -lpthread 
 ELF=main
 src=$(shell find ./lib/ -name '*.c')
@@ -9,7 +9,7 @@ linux: $(obj)
 	$(cc) -o $(ELF)-linux-client $(^) $(LIB)
 
 android:  $(obj)
-	$(cc)  -static -o $(ELF)-andorid-client $(^) $(LIB)
+	$(cc)  -static -o $(ELF)-android-client $(^) $(LIB)
 
 .c.o:
 	$(cc) -c $(<D)/$(<F) -o $(@D)/$(@F) $(LIB)
