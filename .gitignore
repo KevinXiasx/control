@@ -1,0 +1,6 @@
+*.o
+test*
+*tmp.txt
+*core
+*.sh
+server/log/*

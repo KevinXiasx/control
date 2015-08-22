@@ -1,20 +1,37 @@
-cc=arm-linux-gnueabihf-gcc -g
-#cc=gcc -g
-LIB= -lpthread 
 ELF=main
 src=$(shell find ./lib/ -name '*.c')
 obj=$(src:%.c=%.o)
+ifeq ($(PLATM),arm)
+	CC=arm-linux-gnueabihf-gcc -g
+else
+	CC=gcc -g
+endif
 
-linux: $(obj)
-	$(cc) -o $(ELF)-linux-client $(^) $(LIB)
+LIB= -lpthread
 
-android:  $(obj)
-	$(cc)  -static -o $(ELF)-android-client $(^) $(LIB)
+ifeq ($(OS),android)
+	DEF=-D OS=ANDROID 
+	CFLAGS=-static
+else
+	OS=linux
+	DEF=-D OS=LINUX 
+endif
+
+ifeq ($(NET),wan)
+	DEF+= -D NET=WAN 
+else
+	NET=lan
+	DEF+= -D NET=LAN
+endif
+
+$(ELF): $(obj)
+	$(CC) $(CFLAGS) -o $(ELF)-$(OS)-$(NET)-client $(^) $(LIB)
 
 .c.o:
-	$(cc) -c $(<D)/$(<F) -o $(@D)/$(@F) $(LIB)
+	$(CC)  $(DEF) -c $(<D)/$(<F) -o $(@D)/$(@F) $(LIB)
 
+.PHONY :clean 
 clean:
-	rm -rf main-* lib/*.o
+	rm -rf $(ELF)-*-client lib/*.o
 all:
 	echo $(src)

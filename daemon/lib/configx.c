@@ -3,9 +3,20 @@
 
 #define CFGNUM  4
 
-char * filepath = "/data/kevin/con.cfg"; 
-static char * cfgname[CFGNUM] = {"ip","stocport","ctosport","id"};
-static char * cfgvalue[CFGNUM] = {"12.168.1.108","1912","9111","0"};
+#if OS==ANDROID
+	char * filepath = "/data/kevin/con.cfg";
+#elif OS==LINUX
+	char * filepath = "/etc/con.cfg";
+#endif
+
+#if NET==WAN
+	static char * cfgname[CFGNUM] = {"ip","stocport","ctosport","id"};
+	static char * cfgvalue[CFGNUM] = {"sz.radxa.info","1912","1122","0"};
+#elif NET==LAN
+	static char * cfgname[CFGNUM] = {"ip","stocport","ctosport","id"};
+	static char * cfgvalue[CFGNUM] = {"12.168.1.108","1912","9111","0"};
+#endif
+
 
 int readcfg(const char* cfg, char*  value)
 {
